@@ -100,7 +100,7 @@ void ARTS_Character::PossessedBy(AController* NewController)
 void ARTS_Character::UnPossessed()
 {
     Super::UnPossessed();
-
+    
     bScreenEdgeControl = false;
     CurrentViewport = nullptr;
 }

@@ -101,6 +101,31 @@ public:
 
     /** Получить текущее Окно просмотра Пользователя */
     FViewport* GetCurrentViewport() const { return CurrentViewport; }
+
+    /** Получить текущий размер Окна */
+    UFUNCTION(BlueprintCallable,
+        Category = "RTS Player Controller|Mouse")
+    FIntPoint GetCurrentViewportSize()
+    {
+        if (CurrentViewport)
+        {
+            return CurrentViewport->GetSizeXY();
+        }
+        return FIntPoint::NoneValue;
+    };
+
+    /** Получить текущую Позицию мыши в пределах Окна */
+    UFUNCTION(BlueprintCallable,
+        Category = "RTS Player Controller|Mouse")
+    FIntPoint GetCurrentMousePosition()
+    {
+        FIntPoint lPos = FIntPoint::NoneValue;
+        if (CurrentViewport)
+        {
+            CurrentViewport->GetMousePos(lPos);
+        }
+        return lPos;
+    };
     //-------------------------------------------
 
 
