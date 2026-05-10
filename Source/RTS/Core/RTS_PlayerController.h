@@ -59,7 +59,7 @@ protected:
     /* ---   Base   --- */
 
     // Вызывается при Запуске игры или при Спавне в уже запущенной игре
-    //virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
     //-------------------------------------------
 
 
@@ -79,10 +79,10 @@ public:
     /** Включить события мыши */
     FORCEINLINE void EnableMouseEvents(bool bControl)
     {
-        // Выключение реакций от наведения мыши данным контроллером
+        // Контроль реакций от наведения мыши данным контроллером
         bEnableMouseOverEvents = bControl;
 
-        // Выключение реакций от нажатия мыши данным контроллером
+        // Контроль реакций от нажатия мыши данным контроллером
         bEnableClickEvents = bControl;
     };
 
@@ -91,8 +91,16 @@ public:
         Category = "RTS Player Controller|Mouse")
     void SetMouseControlToCenter(bool Value)
     {
-        bMouseToCenter = Value;
+        bMouseControlToCenter = Value;
     };
+
+    /** Установить Мышь в центр экрана */
+    UFUNCTION(BlueprintCallable,
+        Category = "RTS Player Controller|Mouse")
+    void SetMouseToCenter();
+
+    /** Получить текущее Окно просмотра Пользователя */
+    FViewport* GetCurrentViewport() const { return CurrentViewport; }
     //-------------------------------------------
 
 
@@ -115,27 +123,22 @@ public:
 
 private:
 
-    /* ---   Mouse To Center   --- */
+    /* ---   Mouse   --- */
 
-    // Текущая позиция мыши по оси X
-    float MousePositionX = 0;
-
-    // Текущая позиция мыши по оси Y
-    float MousePositionY = 0;
-
-    // Текущий центр экрана по оси X
-    int32 SizeCenterX = 0;
-
-    // Текущий центр экрана по оси Y
-    int32 SizeCenterY = 0;
+    /* Текущее Окно просмотра Пользователя
+    @note   Используется для уменьшения количества операций при контроле мыши */
+    FViewport* CurrentViewport = nullptr;
 
     // Флаг контроля Мыши в центре Экрана
-    bool bMouseToCenter = false;
+    bool bMouseControlToCenter = false;
 
     //
 
-    /** Установить Мышь в центр экрана */
-    void SetMouseToCenter();
+    /** Инициализация данных контроля мыши */
+    void InitMouseControl();
+
+    /** Удерживать Мышь в центр экрана */
+    void KeepMouseCentered();
     //-------------------------------------------
 
 

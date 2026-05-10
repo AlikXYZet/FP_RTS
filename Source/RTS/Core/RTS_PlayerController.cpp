@@ -19,17 +19,14 @@ ARTS_PlayerController::ARTS_PlayerController()
     //-------------------------------------------
 
 
-    /* ---   Role Selection   --- */
+    /* ---   Mouse   --- */
 
     // Дистанция подбора предмета (трассировки наведения Мыши)
     HitResultTraceDistance = 280000.f;
+    // Включить отображение мыши
+    bShowMouseCursor = true;
+    // Включить события мыши
     EnableMouseEvents(true);
-
-    /** "Наблюдатель" по умолчанию
-    @note   Заменяем `PC->StartSpectatingOnly();`, так как в данный момент:
-    * `StateName == NAME_Spectating`;
-    * `PlayerState == nullptr`. */
-    bPlayerIsWaiting = false;
     //-------------------------------------------
 }
 //--------------------------------------------------------------------------------------
@@ -38,17 +35,18 @@ ARTS_PlayerController::ARTS_PlayerController()
 
 /* ---   Base   --- */
 
-//void ARTS_PlayerController::BeginPlay()
-//{
-//    Super::BeginPlay();
-//
-//}
+void ARTS_PlayerController::BeginPlay()
+{
+    Super::BeginPlay();
+
+    InitMouseControl();
+}
 
 void ARTS_PlayerController::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
 
-    SetMouseToCenter();
+    KeepMouseCentered();
 }
 //--------------------------------------------------------------------------------------
 
@@ -56,28 +54,46 @@ void ARTS_PlayerController::Tick(float DeltaSeconds)
 
 /* ---   Mouse   --- */
 
-FORCEINLINE void ARTS_PlayerController::SetMouseToCenter()
+void ARTS_PlayerController::InitMouseControl()
+{
+    if (ULocalPlayer* lLP = Cast<ULocalPlayer>(Player))
+    {
+        if (lLP->ViewportClient
+            && lLP->ViewportClient->Viewport)
+        {
+            CurrentViewport = lLP->ViewportClient->Viewport;
+        }
+    }
+}
+
+void ARTS_PlayerController::SetMouseToCenter()
+{
+    if (!IsPaused() && CurrentViewport)
+    {
+        FIntPoint lSize = CurrentViewport->GetSizeXY();             // Замена перегруженного `GetViewportSize(*,*)`
+        FIntPoint lPos;
+        CurrentViewport->GetMousePos(lPos);                         // Замена перегруженного `GetMousePosition(*,*)`
+
+        if (lPos.X != int32(lSize.X / 2) || lPos.Y != int32(lSize.Y / 2))
+        {
+            CurrentViewport->SetMouse(lSize.X / 2, lSize.Y / 2);    // Замена перегруженного `SetMouseLocation(*,*)`
+        }
+    }
+}
+
+FORCEINLINE void ARTS_PlayerController::KeepMouseCentered()
 {
     // @note    'FORCEINLINE' действует в пределах данного '.cpp'
-    if (bMouseToCenter)
+    if (bMouseControlToCenter)
     {
         if (GetPawn())
         {
-            if (!IsPaused()
-                && GetMousePosition(MousePositionX, MousePositionY))
-            {
-                GetViewportSize(SizeCenterX, SizeCenterY);
-
-                if (MousePositionX != int32(SizeCenterX / 2) || MousePositionY != int32(SizeCenterY / 2))
-                {
-                    SetMouseLocation(SizeCenterX / 2, SizeCenterY / 2);
-                }
-            }
+            SetMouseToCenter();
         }
         else
         {
             // Флаг: Прекратить контроль Мыши
-            bMouseToCenter = false;
+            bMouseControlToCenter = false;
         }
     }
 }
