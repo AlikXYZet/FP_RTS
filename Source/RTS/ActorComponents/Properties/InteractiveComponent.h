@@ -44,7 +44,7 @@ public:
 
     /* ---   Delegates   --- */
 
-    /* Делегат: При Локальном срабатывании действия на Актор */
+    /* Делегат: При срабатывании действия на Актор */
     UPROPERTY(BlueprintAssignable)
     FOnOwnerWasClicked OnOwnerWasClicked;
     //-------------------------------------------
@@ -74,9 +74,9 @@ public:
 
     /* ---   Highlighting   --- */
 
-    /** Имена используемых Компонентов, которые требуют взаимодействие
+    /** Список используемых Компонентов с указанием глубины Выделения
     @warning    Присваивание значений следует проводить в BeginPlay() до вызова Super::BeginPlay()
-                Иначе: Повторно вызывать InitUsedComponents() */
+                Иначе: Повторно вызывать 'InitHighlightedComponents()' для подготовки Компонентов */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
         Category = "Interactive|Highlighting",
         meta = (TitleProperty = "Component"))

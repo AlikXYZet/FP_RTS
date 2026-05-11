@@ -6,6 +6,17 @@
 // UE:
 #include "GameFramework/HUD.h"
 #include "GameFramework/InputSettings.h"
+
+// Interaction:
+#include "RTS/Units/UnitCharacter.h"
+//--------------------------------------------------------------------------------------
+
+
+
+/* ---   Statics   --- */
+
+// Общедоступный указатель на текущий Локальный Контроллер класса 'ARTS_PlayerController'
+ARTS_PlayerController* ARTS_PlayerController::CurrentLocalController = nullptr;
 //--------------------------------------------------------------------------------------
 
 
@@ -25,8 +36,10 @@ ARTS_PlayerController::ARTS_PlayerController()
     HitResultTraceDistance = 280000.f;
     // Включить отображение мыши
     bShowMouseCursor = true;
-    // Включить события мыши
+    // Включить события нажатия мыши и другой клавиши из списка 'Click Event Keys'
     EnableMouseEvents(true);
+    // Изменить трассировку с 'ECC_Visibility' для отслеживания взора на объекты
+    DefaultClickTraceChannel = ECC_MouseSelection;
     //-------------------------------------------
 }
 //--------------------------------------------------------------------------------------
@@ -37,6 +50,16 @@ ARTS_PlayerController::ARTS_PlayerController()
 
 void ARTS_PlayerController::BeginPlay()
 {
+    /* ---   Statics   --- */
+
+    // Общедоступный указатель на текущий Локальный Контроллер класса 'ARTS_PlayerController'
+
+    if (IsLocalController())
+    {
+        CurrentLocalController = this;
+    }
+    //-------------------------------------------
+
     Super::BeginPlay();
 
     InitMouseControl();
@@ -47,6 +70,19 @@ void ARTS_PlayerController::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
 
     KeepMouseCentered();
+}
+
+void ARTS_PlayerController::Destroyed()
+{
+    /* ---   Statics   --- */
+
+    if (CurrentLocalController == this)
+    {
+        CurrentLocalController = nullptr;
+    }
+    //-------------------------------------------
+
+    Super::Destroyed();
 }
 //--------------------------------------------------------------------------------------
 
@@ -129,6 +165,23 @@ TArray<FName> ARTS_PlayerController::GetActionsGroup(FKey Key)
     }
 
     return ActualGroups;
+}
+//--------------------------------------------------------------------------------------
+
+
+
+/* ---   Unit Selection   --- */
+
+void ARTS_PlayerController::ClearSelectedUnits()
+{
+    for (auto Unit : SelectedUnits)
+    {
+        if (Unit)
+        {
+            Unit->SetSelectedByPlayer(false);
+        }
+    }
+    SelectedUnits.Empty();
 }
 //--------------------------------------------------------------------------------------
 

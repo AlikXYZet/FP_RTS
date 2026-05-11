@@ -8,24 +8,22 @@
 // Base:
 #include "GameFramework/PlayerController.h"
 
+// Global:
+#include "RTS/Tools/GlobalMacros.h"
+
 // Generated:
 #include "RTS_PlayerController.generated.h"
 //--------------------------------------------------------------------------------------
 
 
 
-/* ---   Delegates   --- */
-
-// Делегат: При Нажатии на Компонент (при нажатии клавиш из списка 'Click Event Keys' на какой-нибудь компонент)
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnClickingOnComponent, const UPrimitiveComponent*, ClickedPrimitive, FKey, Key);
-//--------------------------------------------------------------------------------------
-
-
-
 /* ---   Pre-declaration of classes   --- */
 
+// Static Functions:
+static ARTS_PlayerController* const GetRTSLocalController();
+
 // Interaction:
-//class UName;
+class AUnitCharacter;
 //--------------------------------------------------------------------------------------
 
 
@@ -37,11 +35,38 @@ class RTS_API ARTS_PlayerController : public APlayerController
 
 public:
 
-    /* ---   Delegates   --- */
+    /* ---   Statics   --- */
 
-    // Делегат: При Нажатии на Компонент (при нажатии клавиш из списка 'Click Event Keys' на какой-нибудь компонент)
-    UPROPERTY(BlueprintAssignable)
-    FOnClickingOnComponent OnClickingOnComponent;
+    // Общедоступный указатель на текущий Локальный Контроллер класса 'ARTS_PlayerController'
+    // @note    Используется для уменьшения зависимостей и использования излишних функций
+    //          Например, функций 'Cast<>' и методов Инициализации в других классах
+    static ARTS_PlayerController* CurrentLocalController;
+
+    //
+
+    /** Метод проверки валидности статического указателя на Локальный Контроллер класса 'ARTS_PlayerController' */
+    FORCEINLINE static bool IsValidStaticPointer()
+    {
+        if (!IsValid(CurrentLocalController))
+        {
+            RTS_LOG_Empty(Error,
+                "Current GameState is NOT 'ARTS_GameStateBase' class. "
+                "See Settings of current 'Game Mode'");
+
+            return false;
+        }
+        return true;
+    };
+
+    /** Метод проверки валидности статического указателя на Локальный Контроллер класса 'ARTS_PlayerController' */
+    UFUNCTION(BlueprintCallable,
+        Category = "RTS Game",
+        meta = (DisplayName = "Is Valid Static Pointer", ExpandBoolAsExecs = "ReturnValue",
+            DefaultToSelf))
+    bool BP_IsValidStaticPointer()
+    {
+        return IsValidStaticPointer();
+    };
     //-------------------------------------------
 
 
@@ -70,6 +95,10 @@ public:
 
     /** Функция, вызываемая каждый кадр в этом Акторе, если не назначена другая частота */
     virtual void Tick(float DeltaSeconds) override;
+
+    /** Вызывается, когда этот субъект явно уничтожается во время игрового процесса или в редакторе,
+    * но не вызывается во время трансляции уровней или завершения игрового процесса */
+    virtual void Destroyed() override;
     //-------------------------------------------
 
 
@@ -132,7 +161,8 @@ public:
 
     /* ---   Action   --- */
 
-    // Выбранные группы Действий
+    /* Выбранные группы Действий для отслеживания Клавиш
+    @note   Заполняет парамметр 'Click Event Keys' клавишами из данных Групп */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
         Category = "RTS Player Controller|Action",
         meta = (GetOptions = "GetActionNames"))
@@ -146,7 +176,47 @@ public:
 
 
 
+    /* ---   Unit Selection   --- */
+
+    /** Массив Выбранных Юнитов */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite,
+        Category = "RTS Player Controller|Unit Selection")
+    TSet<AUnitCharacter*> SelectedUnits;
+
+    //
+
+    void AddUnitToSelectedUnits(AUnitCharacter* Unit)
+    {
+        SelectedUnits.Add(Unit);
+    };
+
+    void RemoveUnitFromSelectedUnits(AUnitCharacter* Unit)
+    {
+        SelectedUnits.Remove(Unit);
+    };
+
+    UFUNCTION(BlueprintCallable,
+        Category = "RTS Player Controller|Unit Selection")
+    void ClearSelectedUnits();
+    //-------------------------------------------
+
+
+
 private:
+
+    /* ---   Statics   --- */
+
+    /** Получить текущий Локальный Контроллер класса 'ARTS_PlayerController' в среде 'Blueprint' */
+    UFUNCTION(BlueprintPure,
+        Category = "RTS Game",
+        meta = (DisplayName = "Get RTS Local Controller"))
+    static class ARTS_PlayerController* BP_GetRTSLocalController()
+    {
+        return GetRTSLocalController();
+    };
+    //-------------------------------------------
+
+
 
     /* ---   Mouse   --- */
 
@@ -196,3 +266,39 @@ private:
 #endif
     //===========================================
 };
+//--------------------------------------------------------------------------------------
+
+
+
+/* ---   Statics   --- */
+
+/** Получить текущий Локальный Контроллер класса 'ARTS_PlayerController' */
+FORCEINLINE static ARTS_PlayerController* const GetRTSLocalController()
+{
+#if WITH_EDITOR
+
+    if (!ARTS_PlayerController::CurrentLocalController)
+    {
+        for (FConstPlayerControllerIterator Iterator = GEngine->GameViewport->GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+        {
+            if (APlayerController* PlayerController = Iterator->Get())
+            {
+                // Проверка локальности контроллера
+                if (Cast<ULocalPlayer>(PlayerController->Player))
+                {
+                    return ARTS_PlayerController::CurrentLocalController = Cast<ARTS_PlayerController>(PlayerController);
+                }
+            }
+        }
+        return ARTS_PlayerController::CurrentLocalController;
+    }
+    else
+
+#endif // WITH_EDITOR
+
+    {
+        // В режиме "Play In Editor" данный указатель очищается, однако стабильно работает в готовой сборке
+        return ARTS_PlayerController::CurrentLocalController;
+    }
+};
+//--------------------------------------------------------------------------------------

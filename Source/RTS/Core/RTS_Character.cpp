@@ -36,6 +36,7 @@ ARTS_Character::ARTS_Character()
     PrimaryActorTick.bCanEverTick = true; // Принудительно
     //SetActorTickInterval(0.1f); // 10 раз/сек.
 
+    // Не отслеживаем пересечения коллизии
     bGenerateOverlapEventsDuringLevelStreaming = false;
     //-------------------------------------------
 

@@ -36,7 +36,8 @@ public:
 
     /* ---   Base   --- */
 
-    /** Проверка Объекта на реализацию данного Интерфейса */
+    /** Бфстрая Проверка Объекта на реализацию данного Интерфейса
+    @note   Вызов методов 'Execute_*' в Объекте без реализованного Интерфейса вызовет фатальную ошибку */
     FORCEINLINE static bool CheckImplementation(const UObject* O)
     {
         return O->GetClass()->ImplementsInterface(UInteractiveInterface::StaticClass());

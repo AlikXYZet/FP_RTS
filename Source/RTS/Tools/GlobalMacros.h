@@ -22,7 +22,8 @@ RTS_API DECLARE_LOG_CATEGORY_EXTERN(LogRTS, All, All);
 
 /* ---   Collision   --- */
 
-#define ECC_Pickables   ECC_GameTraceChannel1 // Канал трассировки "Pickables"
+#define ECC_Pickables       ECC_GameTraceChannel1   // Канал трассировки "Pickables"
+#define ECC_MouseSelection  ECC_GameTraceChannel2   // Канал трассировки "Mouse Selection"
 
 #define ProfileName_Destructible            TEXT("Destructible")
 #define ProfileName_InvisibleWallDynamic    TEXT("InvisibleWallDynamic")

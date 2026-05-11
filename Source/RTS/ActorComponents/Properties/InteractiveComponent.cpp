@@ -93,21 +93,18 @@ void UInteractiveComponent::InitHighlightedComponents()
                 {
                     if (IsValid(PrimComp.Component))
                     {
-                        HighlightedComponents.Add(PrimComp);
+                        HighlightedComponents.AddUnique(PrimComp);
                     }
                 }
             }
         }
 
-        if (HighlightedComponents.IsValidIndex(0))
+        for (FComponentRendering& Data : HighlightedComponents)
         {
-            for (FComponentRendering& Data : HighlightedComponents)
+            if (IsValid(Data.Component))
             {
-                if (IsValid(Data.Component))
-                {
-                    // Настройка канала (цвета) контура подсветки для выделяемого компонента
-                    Data.Component->SetCustomDepthStencilValue(Data.DepthStencilValue);
-                }
+                // Настройка канала (цвета) контура подсветки для выделяемого компонента
+                Data.Component->SetCustomDepthStencilValue(Data.DepthStencilValue);
             }
         }
 
