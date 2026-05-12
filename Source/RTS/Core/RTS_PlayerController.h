@@ -178,22 +178,26 @@ public:
 
     /* ---   Unit Selection   --- */
 
-    /** Массив Выбранных Юнитов */
+    /* Массив Выбранных Союзных Юнитов */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
         Category = "RTS Player Controller|Unit Selection")
-    TSet<AUnitCharacter*> SelectedUnits;
+    TSet<AUnitCharacter*> SelectedAlliedUnits;
+
+    /* Выбранный Вражеский Юнит */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite,
+        Category = "RTS Player Controller|Unit Selection")
+    AUnitCharacter* SelectedEnemyUnits;
+
+    /* Номер Фракции данного Юнита */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite,
+        Category = "RTS Player Controller|Unit Selection")
+    uint8 FractionNumber = 0;
 
     //
 
-    void AddUnitToSelectedUnits(AUnitCharacter* Unit)
-    {
-        SelectedUnits.Add(Unit);
-    };
+    void AddUnitToSelectedUnits(AUnitCharacter* Unit);
 
-    void RemoveUnitFromSelectedUnits(AUnitCharacter* Unit)
-    {
-        SelectedUnits.Remove(Unit);
-    };
+    void RemoveUnitFromSelectedUnits(AUnitCharacter* Unit);
 
     UFUNCTION(BlueprintCallable,
         Category = "RTS Player Controller|Unit Selection")
@@ -220,12 +224,12 @@ private:
 
     /* ---   Mouse   --- */
 
+    // Флаг контроля Мыши в центре Экрана
+    bool bMouseControlToCenter = false;
+
     /* Текущее Окно просмотра Пользователя
     @note   Используется для уменьшения количества операций при контроле мыши */
     FViewport* CurrentViewport = nullptr;
-
-    // Флаг контроля Мыши в центре Экрана
-    bool bMouseControlToCenter = false;
 
     //
 

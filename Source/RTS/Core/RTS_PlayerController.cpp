@@ -172,16 +172,48 @@ TArray<FName> ARTS_PlayerController::GetActionsGroup(FKey Key)
 
 /* ---   Unit Selection   --- */
 
+void ARTS_PlayerController::AddUnitToSelectedUnits(AUnitCharacter* Unit)
+{
+    if (Unit->FractionNumber == FractionNumber)
+    {
+        SelectedAlliedUnits.Add(Unit);
+    }
+    else
+    {
+        if (SelectedEnemyUnits)
+            SelectedEnemyUnits->SetSelectedByPlayer(false);
+        SelectedEnemyUnits = Unit;
+    }
+}
+
+void ARTS_PlayerController::RemoveUnitFromSelectedUnits(AUnitCharacter* Unit)
+{
+    if (Unit->FractionNumber == FractionNumber)
+    {
+        SelectedAlliedUnits.Remove(Unit);
+    }
+    else
+    {
+        if (SelectedEnemyUnits)
+            SelectedEnemyUnits->SetSelectedByPlayer(false);
+        SelectedEnemyUnits = nullptr;
+    }
+}
+
 void ARTS_PlayerController::ClearSelectedUnits()
 {
-    for (auto Unit : SelectedUnits)
+    for (auto Unit : SelectedAlliedUnits)
     {
         if (Unit)
         {
             Unit->SetSelectedByPlayer(false);
         }
     }
-    SelectedUnits.Empty();
+    SelectedAlliedUnits.Empty();
+
+    if (SelectedEnemyUnits)
+        SelectedEnemyUnits->SetSelectedByPlayer(false);
+    SelectedEnemyUnits = nullptr;
 }
 //--------------------------------------------------------------------------------------
 

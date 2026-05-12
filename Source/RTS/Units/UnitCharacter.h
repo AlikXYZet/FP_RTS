@@ -183,6 +183,13 @@ public:
 
     /* ---   Unit Selection   --- */
 
+    /* Номер Фракции данного Юнита */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite,
+        Category = "Unit Character|Selection")
+    uint8 FractionNumber = 0;
+
+    //
+
     /** Установить состояние "Выбранный" */
     UFUNCTION(BlueprintCallable,
         Category = "Unit Character|Selection")
