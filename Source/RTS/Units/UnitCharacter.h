@@ -11,6 +11,7 @@
 // Interfaces:
 #include "AbilitySystemInterface.h"
 #include "RTS/Tools/Interfaces/Properties/InteractiveInterface.h"
+#include "RTS/Tools/Interfaces/Properties/SelectableActorInterface.h"
 
 // GAS:
 #include "RTS/GAS/RTS_AbilitySystemComponent.h"
@@ -36,7 +37,7 @@ class UInteractiveComponent;
 
 
 UCLASS()
-class RTS_API AUnitCharacter : public ACharacter, public IAbilitySystemInterface, public IInteractiveInterface
+class RTS_API AUnitCharacter : public ACharacter, public IAbilitySystemInterface, public IInteractiveInterface, public ISelectableActorInterface
 {
     GENERATED_BODY()
 
@@ -113,19 +114,7 @@ public:
 
 
 
-    /* ---   Interactive   --- */
-
-    /** Получить компоненты, которые требуется подсветить */
-    virtual TArray<FComponentRendering> GetUsedComponents_Implementation() override;
-
-    /** При срабатывании Интерактивного Действия */
-    UFUNCTION()
-    void OnInteractiveAction(const FKey& ButtonReleased);
-    //-------------------------------------------
-
-
-
-    /* ---   GAS   --- */
+    /* ---   Interface: GAS   --- */
 
     /** Возвращает Компонент Системы Способностей данного Игрока */
     FORCEINLINE virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override
@@ -181,25 +170,40 @@ public:
 
 
 
-    /* ---   Unit Selection   --- */
+    /* ---   Interface: Interactive   --- */
+
+    /** Получить компоненты, которые требуется подсветить */
+    virtual TArray<FComponentRendering> GetUsedComponents_Implementation() override;
+    //-------------------------------------------
+
+
+
+    /* ---   Interactive   --- */
+
+    /** При срабатывании Интерактивного Действия */
+    UFUNCTION()
+    void OnInteractiveAction(const FKey& ButtonReleased);
+    //-------------------------------------------
+
+
+
+    /* ---   Interface: Selectable Actor   --- */
+
+    /** Установить состояние "Выбранный" */
+    virtual void SetSelectedByPlayer_Implementation(bool bIsSelected) override;
+
+    /** Является ли "Выбранным"? */
+    virtual bool IsSelectedByPlayer_Implementation() const override;
+    //-------------------------------------------
+
+
+
+    /* ---   Selectable Actor   --- */
 
     /* Номер Фракции данного Юнита */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
         Category = "Unit Character|Selection")
     uint8 FractionNumber = 0;
-
-    //
-
-    /** Установить состояние "Выбранный" */
-    UFUNCTION(BlueprintCallable,
-        Category = "Unit Character|Selection")
-    virtual void SetSelectedByPlayer(bool bIsSelected);
-
-    /** Является ли "Выбранным"? */
-    UFUNCTION(BlueprintPure,
-        Category = "Unit Character|Selection",
-        meta = (DisplayName = "Is Selected?"))
-    virtual bool IsSelectedByPlayer() const;
     //-------------------------------------------
 
 

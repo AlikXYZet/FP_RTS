@@ -40,7 +40,7 @@ public:
     @note   Вызов методов 'Execute_*' в Объекте без реализованного Интерфейса вызовет фатальную ошибку */
     FORCEINLINE static bool CheckImplementation(const UObject* O)
     {
-        return O->GetClass()->ImplementsInterface(UInteractiveInterface::StaticClass());
+        return O ? O->GetClass()->ImplementsInterface(UInteractiveInterface::StaticClass()) : false;
     };
     //-------------------------------------------
 

@@ -99,6 +99,9 @@ public:
     /** Вызывается, когда этот субъект явно уничтожается во время игрового процесса или в редакторе,
     * но не вызывается во время трансляции уровней или завершения игрового процесса */
     virtual void Destroyed() override;
+
+    /** Вызывается при нажатии Клавиш Событий из списка параметра 'Click Event Keys' */
+    virtual bool InputKey(FKey Key, EInputEvent EventType, float AmountDepressed, bool bGamepad) override;
     //-------------------------------------------
 
 
@@ -168,6 +171,11 @@ public:
         meta = (GetOptions = "GetActionNames"))
     TArray<FName> SelectedActionGroups;
 
+    /* Результат Попадания для Групп Действий отслеживаемых Клавиш */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite,
+        Category = "RTS Player Controller|Action")
+    FHitResult HitResultForActionGroups;
+
     //
 
     /** Получить группы клавиш воздействия контроллера */
@@ -176,31 +184,35 @@ public:
 
 
 
-    /* ---   Unit Selection   --- */
+    /* ---   Selectable Actor   --- */
 
     /* Массив Выбранных Союзных Юнитов */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
-        Category = "RTS Player Controller|Unit Selection")
-    TSet<AUnitCharacter*> SelectedAlliedUnits;
+        Category = "RTS Player Controller|Selectable Actor")
+    TArray<AUnitCharacter*> SelectedAlliedUnits;
+    /* PS: 'TSet' не подходит, так как есть необходимость в манипуляциях в среде 'Blueprint' */
 
-    /* Выбранный Вражеский Юнит */
+    /* Выбранный целевой Актор Взаимодействия */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
-        Category = "RTS Player Controller|Unit Selection")
-    AUnitCharacter* SelectedEnemyUnits;
+        Category = "RTS Player Controller|Selectable Actor")
+    AActor* SelectedActor;
 
     /* Номер Фракции данного Юнита */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
-        Category = "RTS Player Controller|Unit Selection")
+        Category = "RTS Player Controller|Selectable Actor")
     uint8 FractionNumber = 0;
 
     //
 
-    void AddUnitToSelectedUnits(AUnitCharacter* Unit);
+    /** Добавить Юнита для отслеживания */
+    void AddUnitToSelectedUnits(AActor* Unit);
 
-    void RemoveUnitFromSelectedUnits(AUnitCharacter* Unit);
+    /** Убрать Юнита из отслеживания */
+    void RemoveUnitFromSelectedUnits(AActor* Unit);
 
+    /** Очистить список отлеживаемых Юнитов */
     UFUNCTION(BlueprintCallable,
-        Category = "RTS Player Controller|Unit Selection")
+        Category = "RTS Player Controller|Selectable Actor")
     void ClearSelectedUnits();
     //-------------------------------------------
 

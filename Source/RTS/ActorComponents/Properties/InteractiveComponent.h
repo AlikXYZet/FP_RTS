@@ -143,7 +143,7 @@ private:
     UPROPERTY(EditDefaultsOnly,
         Category = "Interactive|Actions",
         meta = (GetOptions = "GetActionGroupsNames"))
-    FName SelectedActionGroups;
+    FName SelectedActionGroups = NAME_None;
     //-------------------------------------------
 
 #endif // WITH_EDITORONLY_DATA

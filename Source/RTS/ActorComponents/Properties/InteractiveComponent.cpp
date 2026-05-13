@@ -168,21 +168,26 @@ TArray<FName> UInteractiveComponent::GetActionGroupsNames() const
     TArray<FName> ActionNames;
 
     UInputSettings::GetInputSettings()->GetActionNames(ActionNames);
+    ActionNames.Add(NAME_None);
 
     return ActionNames;
 }
 
 void UInteractiveComponent::ReInitActionGroup()
 {
-    UInputSettings* InputSettings = UInputSettings::GetInputSettings();
-    TArray<FInputActionKeyMapping> lArray;
-
-    InputSettings->GetActionMappingByName(SelectedActionGroups, lArray);
     ActionKeys.Empty();
 
-    for (FInputActionKeyMapping& Data : lArray)
+    if (SelectedActionGroups != NAME_None)
     {
-        ActionKeys.Add(Data.Key);
+        UInputSettings* InputSettings = UInputSettings::GetInputSettings();
+        TArray<FInputActionKeyMapping> lArray;
+
+        InputSettings->GetActionMappingByName(SelectedActionGroups, lArray);
+
+        for (FInputActionKeyMapping& Data : lArray)
+        {
+            ActionKeys.Add(Data.Key);
+        }
     }
 }
 //--------------------------------------------------------------------------------------

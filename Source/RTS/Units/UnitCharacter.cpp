@@ -130,23 +130,28 @@ void AUnitCharacter::PreInitializeComponents()
 
 
 
-/* ---   Interactive | Highlighting   --- */
+/* ---   Interface: Interactive   --- */
 
 TArray<FComponentRendering> AUnitCharacter::GetUsedComponents_Implementation()
 {
-    return TArray<FComponentRendering>{FComponentRendering(GetMesh())};
+    return TArray<FComponentRendering>{ FComponentRendering(GetMesh()) };
 }
+//--------------------------------------------------------------------------------------
+
+
+
+/* ---   Interactive   --- */
 
 void AUnitCharacter::OnInteractiveAction(const FKey& ButtonReleased)
 {
-    if (IsSelectedByPlayer())
+    if (Execute_IsSelectedByPlayer(this))
     {
-        SetSelectedByPlayer(false);
+        Execute_SetSelectedByPlayer(this, false);
         GetRTSLocalController()->RemoveUnitFromSelectedUnits(this);
     }
     else
     {
-        SetSelectedByPlayer(true);
+        Execute_SetSelectedByPlayer(this, true);
         GetRTSLocalController()->AddUnitToSelectedUnits(this);
     }
 }
@@ -204,18 +209,18 @@ void AUnitCharacter::OnZeroHealth()
 
 
 
-/* ---   Unit Selection   --- */
+/* ---   Interface: Selectable Actor   --- */
 
-void AUnitCharacter::SetSelectedByPlayer(bool bIsSelected)
+void AUnitCharacter::SetSelectedByPlayer_Implementation(bool bIsSelected)
 {
-    if (IsSelectedByPlayer() != bIsSelected
+    if (Execute_IsSelectedByPlayer(this) != bIsSelected
         && Decal)
     {
         Decal->SetHiddenInGame(!bIsSelected);
     }
 }
 
-bool AUnitCharacter::IsSelectedByPlayer() const
+bool AUnitCharacter::IsSelectedByPlayer_Implementation() const
 {
     return Decal ? !Decal->bHiddenInGame : false;
 }

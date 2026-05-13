@@ -9,6 +9,9 @@
 
 // Interaction:
 #include "RTS/Units/UnitCharacter.h"
+
+// Interfaces:
+#include "RTS/Tools/Interfaces/Properties/InteractiveInterface.h"
 //--------------------------------------------------------------------------------------
 
 
@@ -83,6 +86,63 @@ void ARTS_PlayerController::Destroyed()
     //-------------------------------------------
 
     Super::Destroyed();
+}
+
+bool ARTS_PlayerController::InputKey(FKey Key, EInputEvent EventType, float AmountDepressed, bool bGamepad)
+{
+    // @note    Дублируем, оптимизируем и расширяем код из 'Super::InputKey(*)'
+
+    bool bResult = false;
+    if (PlayerInput)
+    {
+        bResult = PlayerInput->InputKey(Key, EventType, AmountDepressed, bGamepad);
+        if (bEnableClickEvents && (ClickEventKeys.Contains(Key) || ClickEventKeys.Contains(EKeys::AnyKey)))
+        {
+            FVector2D MousePosition;
+            UGameViewportClient* ViewportClient = CastChecked<ULocalPlayer>(Player)->ViewportClient;
+            if (ViewportClient && ViewportClient->GetMousePosition(MousePosition))
+            {
+                if (!(GetHUD() && GetHUD()->UpdateAndDispatchHitBoxClickEvents(MousePosition, EventType)))
+                {
+                    // Вызываем Трассировку при любом воздействии
+                    const bool bHit = GetHitResultAtScreenPosition(MousePosition, CurrentClickTraceChannel, true, HitResultForActionGroups);
+
+                    UPrimitiveComponent* ClickedPrimitive = nullptr;
+                    if (bEnableMouseOverEvents)
+                    {
+                        ClickedPrimitive = CurrentClickablePrimitive.Get();
+                    }
+                    else if (bHit)
+                    {
+                        ClickedPrimitive = HitResultForActionGroups.Component.Get();
+                    }
+
+                    if (ClickedPrimitive)
+                    {
+                        switch (EventType)
+                        {
+                        case IE_Pressed:
+                        case IE_DoubleClick:
+                            ClickedPrimitive->DispatchOnClicked(Key);
+                            break;
+
+                        case IE_Released:
+                            ClickedPrimitive->DispatchOnReleased(Key);
+                            break;
+
+                        case IE_Axis:
+                        case IE_Repeat:
+                            break;
+                        }
+                    }
+                }
+
+                bResult = true;
+            }
+        }
+    }
+
+    return bResult;
 }
 //--------------------------------------------------------------------------------------
 
@@ -170,33 +230,35 @@ TArray<FName> ARTS_PlayerController::GetActionsGroup(FKey Key)
 
 
 
-/* ---   Unit Selection   --- */
+/* ---   Selectable Actor   --- */
 
-void ARTS_PlayerController::AddUnitToSelectedUnits(AUnitCharacter* Unit)
+void ARTS_PlayerController::AddUnitToSelectedUnits(AActor* Unit)
 {
-    if (Unit->FractionNumber == FractionNumber)
+    if (Cast<AUnitCharacter>(Unit)
+        && ((AUnitCharacter*)Unit)->FractionNumber == FractionNumber)
     {
-        SelectedAlliedUnits.Add(Unit);
+        SelectedAlliedUnits.Add((AUnitCharacter*)Unit);
     }
     else
     {
-        if (SelectedEnemyUnits)
-            SelectedEnemyUnits->SetSelectedByPlayer(false);
-        SelectedEnemyUnits = Unit;
+        if (ISelectableActorInterface::CheckImplementation(SelectedActor))
+            ISelectableActorInterface::Execute_SetSelectedByPlayer(SelectedActor, false);
+        SelectedActor = Unit;
     }
 }
 
-void ARTS_PlayerController::RemoveUnitFromSelectedUnits(AUnitCharacter* Unit)
+void ARTS_PlayerController::RemoveUnitFromSelectedUnits(AActor* Unit)
 {
-    if (Unit->FractionNumber == FractionNumber)
+    if (Cast<AUnitCharacter>(Unit)
+        && ((AUnitCharacter*)Unit)->FractionNumber == FractionNumber)
     {
-        SelectedAlliedUnits.Remove(Unit);
+        SelectedAlliedUnits.Remove((AUnitCharacter*)Unit);
     }
     else
     {
-        if (SelectedEnemyUnits)
-            SelectedEnemyUnits->SetSelectedByPlayer(false);
-        SelectedEnemyUnits = nullptr;
+        if (ISelectableActorInterface::CheckImplementation(SelectedActor))
+            ISelectableActorInterface::Execute_SetSelectedByPlayer(SelectedActor, false);
+        SelectedActor = nullptr;
     }
 }
 
@@ -206,14 +268,14 @@ void ARTS_PlayerController::ClearSelectedUnits()
     {
         if (Unit)
         {
-            Unit->SetSelectedByPlayer(false);
+            ISelectableActorInterface::Execute_SetSelectedByPlayer(Unit, false);
         }
     }
     SelectedAlliedUnits.Empty();
 
-    if (SelectedEnemyUnits)
-        SelectedEnemyUnits->SetSelectedByPlayer(false);
-    SelectedEnemyUnits = nullptr;
+    if (ISelectableActorInterface::CheckImplementation(SelectedActor))
+        ISelectableActorInterface::Execute_SetSelectedByPlayer(SelectedActor, false);
+    SelectedActor = nullptr;
 }
 //--------------------------------------------------------------------------------------
 
