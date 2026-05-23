@@ -5,6 +5,7 @@
 
 // Macros:
 #include "RTS/Tools/GlobalMacros.h"
+#include "RTS/Tools/GlobalFunctions.h"
 
 // GAS:
 #include "RTS/GAS/RTS_AttributeSet.h"
@@ -83,10 +84,7 @@ void AUnitCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (InteractiveComponent)
-    {
-        InteractiveComponent->OnOwnerWasClicked.AddDynamic(this, &AUnitCharacter::OnInteractiveAction);;
-    }
+    InitAbilitySystemComp();
 }
 
 //void AUnitCharacter::Tick(float DeltaTime)
@@ -141,20 +139,6 @@ TArray<FComponentRendering> AUnitCharacter::GetUsedComponents_Implementation()
 
 
 /* ---   Interactive   --- */
-
-void AUnitCharacter::OnInteractiveAction(const FKey& ButtonReleased)
-{
-    if (Execute_IsSelectedByPlayer(this))
-    {
-        Execute_SetSelectedByPlayer(this, false);
-        GetRTSLocalController()->RemoveUnitFromSelectedUnits(this);
-    }
-    else
-    {
-        Execute_SetSelectedByPlayer(this, true);
-        GetRTSLocalController()->AddUnitToSelectedUnits(this);
-    }
-}
 //--------------------------------------------------------------------------------------
 
 

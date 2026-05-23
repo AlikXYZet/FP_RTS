@@ -1,3 +1,5 @@
+//
+
 #pragma once
 
 // Core:
@@ -9,9 +11,13 @@
 // UE:
 #include "EngineUtils.h"
 #include "GameFramework/Actor.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 
 // C++:
 #include <random>
+
+// Generated:
+#include "GlobalFunctions.generated.h"
 //--------------------------------------------------------------------------------------
 
 
@@ -108,5 +114,36 @@ FORCEINLINE bool GetRandom(float Chance = 0.5f)
 FORCEINLINE float GetRandomFloat(float max = 1.f, float min = 0.f)
 {
     return GetRandom(max * 256, min * 256) / 256.f;
+};
+//--------------------------------------------------------------------------------------
+
+
+
+/* ---   Blueprint   --- */
+
+UCLASS(meta = (BlueprintThreadSafe, ScriptName = "GlobalFunctions"))
+class RTS_API UBlueprintGlobalFunctions : public UBlueprintFunctionLibrary
+{
+    GENERATED_BODY()
+
+    /** Converts localizable FText to a FName value */
+    UFUNCTION(BlueprintPure,
+        Category = "Utilities|Text",
+        meta = (DisplayName = "ToName (text)", CompactNodeTitle = "->", BlueprintAutocast))
+    static FName Conv_TextToName(const FText& InText)
+    {
+        return FName(InText.ToString());
+    };
+
+    /** Creates a literal FName from FText
+     @param     Value -- Value to set the FText to
+     @return    The literal FName */
+    UFUNCTION(BlueprintPure,
+        Category = "Utilities|Name",
+        meta = (BlueprintThreadSafe))
+    static FName MakeLiteralNameFromText(FText Value)
+    {
+        return FName(Value.ToString());
+    };
 };
 //--------------------------------------------------------------------------------------

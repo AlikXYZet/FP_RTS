@@ -89,6 +89,14 @@ protected:
 
 
 
+    /* ---   Inputs | Actions   --- */
+
+    /** Вызывается для привязки к входным данным */
+    virtual void SetupInputComponent() override;
+    //-------------------------------------------
+
+
+
 public:
 
     /* ---   Base   --- */
@@ -99,6 +107,35 @@ public:
     /** Вызывается, когда этот субъект явно уничтожается во время игрового процесса или в редакторе,
     * но не вызывается во время трансляции уровней или завершения игрового процесса */
     virtual void Destroyed() override;
+    //-------------------------------------------
+
+
+
+    /* ---   Inputs | Actions   --- */
+
+    /* Группа Действий для "Экранный Выбор" */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
+        Category = "RTS Player Controller|Inputs|Actions",
+        meta = (GetOptions = "GetActionGroupsNames",
+            DisplayName = "On-Screen Selection"))
+    FName ActionGroups_OnScreenSelection = NAME_None;
+
+    /* Группа Действий для "Экранное Действие" */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
+        Category = "RTS Player Controller|Inputs|Actions",
+        meta = (GetOptions = "GetActionGroupsNames",
+            DisplayName = "On-Screen Action"))
+    FName ActionGroups_OnScreenAction = NAME_None;
+
+    /* Выбранные группы Действий для отслеживания Клавиш
+    @note   Заполняет парамметр 'Click Event Keys' клавишами из данных Групп */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite,
+        Category = "RTS Player Controller|Inputs|Actions",
+        meta = (GetOptions = "GetActionGroupsNames",
+            DisplayName = "Other Screen Interactions"))
+    TArray<FName> ActionGroups_OtherScreenInteractions;
+
+    //
 
     /** Вызывается при нажатии Клавиш Событий из списка параметра 'Click Event Keys' */
     virtual bool InputKey(FKey Key, EInputEvent EventType, float AmountDepressed, bool bGamepad) override;
@@ -164,22 +201,10 @@ public:
 
     /* ---   Action   --- */
 
-    /* Выбранные группы Действий для отслеживания Клавиш
-    @note   Заполняет парамметр 'Click Event Keys' клавишами из данных Групп */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite,
-        Category = "RTS Player Controller|Action",
-        meta = (GetOptions = "GetActionNames"))
-    TArray<FName> SelectedActionGroups;
-
     /* Результат Попадания для Групп Действий отслеживаемых Клавиш */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
         Category = "RTS Player Controller|Action")
     FHitResult HitResultForActionGroups;
-
-    //
-
-    /** Получить группы клавиш воздействия контроллера */
-    TArray<FName> GetActionsGroup(FKey Key);
     //-------------------------------------------
 
 
@@ -189,13 +214,12 @@ public:
     /* Массив Выбранных Союзных Юнитов */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
         Category = "RTS Player Controller|Selectable Actor")
-    TArray<AUnitCharacter*> SelectedAlliedUnits;
-    /* PS: 'TSet' не подходит, так как есть необходимость в манипуляциях в среде 'Blueprint' */
+    TSet<AUnitCharacter*> SelectedAlliedUnits;
 
-    /* Выбранный целевой Актор Взаимодействия */
+    /* Выбранный Актор целевого Действия */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
         Category = "RTS Player Controller|Selectable Actor")
-    AActor* SelectedActor;
+    AActor* SelectedTargetActionActor;
 
     /* Номер Фракции данного Юнита */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
@@ -203,12 +227,6 @@ public:
     uint8 FractionNumber = 0;
 
     //
-
-    /** Добавить Юнита для отслеживания */
-    void AddUnitToSelectedUnits(AActor* Unit);
-
-    /** Убрать Юнита из отслеживания */
-    void RemoveUnitFromSelectedUnits(AActor* Unit);
 
     /** Очистить список отлеживаемых Юнитов */
     UFUNCTION(BlueprintCallable,
@@ -234,6 +252,19 @@ private:
 
 
 
+    /* ---   Inputs | Actions   --- */
+
+    /** Действие при "Экранном Выборе" */
+    UFUNCTION()
+    void OnScreenSelection();
+
+    /** Действие при "Экранном Воздействии" */
+    UFUNCTION()
+    void OnScreenAction();
+    //-------------------------------------------
+
+
+
     /* ---   Mouse   --- */
 
     // Флаг контроля Мыши в центре Экрана
@@ -254,6 +285,14 @@ private:
 
 
 
+    /* ---   Selectable Actor   --- */
+
+    /* Выбрать другой Актор для Действия */
+    void SetSelectedTargetActionActor(AActor* TargetActor);
+    //-------------------------------------------
+
+
+
     /* ===   For EDITOR only   === */
 
 #if WITH_EDITOR
@@ -268,16 +307,16 @@ public:
 
 
 
-private:
+public:
 
-    /* ---   Actions   --- */
+    /* ---   Inputs | Actions   --- */
 
-    /* Предварительная инициализация Клавиш, используемых с прицеливанием (наведение мышью и нажатие клавиши) */
-    void InitActionGroup();
+    /* Предварительная инициализация Клавиш, используемых для взаимодействия (нажатие клавиши в момент наведения мышью) */
+    void UpdateClickEventKeys();
 
     /* Получить имена всех Функций-Предикатов Актора-Владельца */
     UFUNCTION()
-    TArray<FName> GetActionNames();
+    TArray<FName> GetActionGroupsNames();
     //-------------------------------------------
 #endif
     //===========================================

@@ -179,10 +179,6 @@ public:
 
 
     /* ---   Interactive   --- */
-
-    /** При срабатывании Интерактивного Действия */
-    UFUNCTION()
-    void OnInteractiveAction(const FKey& ButtonReleased);
     //-------------------------------------------
 
 

@@ -143,20 +143,6 @@ TArray<FComponentRendering> AAttributedActor::GetUsedComponents_Implementation()
 
 
 /* ---   Interactive   --- */
-
-void AAttributedActor::OnInteractiveAction(const FKey& ButtonReleased)
-{
-    if (Execute_IsSelectedByPlayer(this))
-    {
-        Execute_SetSelectedByPlayer(this, false);
-        GetRTSLocalController()->RemoveUnitFromSelectedUnits(this);
-    }
-    else
-    {
-        Execute_SetSelectedByPlayer(this, true);
-        GetRTSLocalController()->AddUnitToSelectedUnits(this);
-    }
-}
 //--------------------------------------------------------------------------------------
 
 

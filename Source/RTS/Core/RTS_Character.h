@@ -113,7 +113,7 @@ public:
 
     // Группа Действий для "Test"
     //UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
-    //    Category = "RTS_Character|Inputs|Actions",
+    //    Category = "RTS Character|Inputs|Actions",
     //    meta = (GetOptions = "GetActionGroupsNames",
     //        DisplayName = "Test"))
     //FName ActionGroups_Test = NAME_None;
@@ -125,21 +125,21 @@ public:
 
     // Группа Осей для "Движения Вперёд" (вперёд-назад)
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
-        Category = "RTS_Character|Inputs|Axis",
+        Category = "RTS Character|Inputs|Axis",
         meta = (GetOptions = "GetAxisGroupsNames",
             DisplayName = "Move Forward"))
     FName AxisGroups_MoveForward = NAME_None;
 
     // Группа Осей для "Движения Вправо" (вправо-влево)
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
-        Category = "RTS_Character|Inputs|Axis",
+        Category = "RTS Character|Inputs|Axis",
         meta = (GetOptions = "GetAxisGroupsNames",
             DisplayName = "Move Right"))
     FName AxisGroups_MoveRight = NAME_None;
 
     // Группа Осей для задания Высоты Камеры
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
-        Category = "RTS_Character|Inputs|Axis",
+        Category = "RTS Character|Inputs|Axis",
         meta = (GetOptions = "GetAxisGroupsNames",
             DisplayName = "Camera Height"))
     FName AxisGroups_CameraHeight = NAME_None;
@@ -151,13 +151,13 @@ public:
 
     /* Процент зоны чувствительности для управления через наведение мыши на Края Экрана */
     UPROPERTY(EditAnywhere,
-        Category = "RTS_Character|Inputs|Movement",
+        Category = "RTS Character|Inputs|Movement",
         meta = (ClampMin = 0, UIMin = 0, ClampMax = 0.5f, UIMax = 0.5f))
     FVector2D SensitiveZonePercentage = FVector2D(0.2f);
 
     /* Скорость перемещения */
     UPROPERTY(EditAnywhere,
-        Category = "RTS_Character|Inputs|Movement",
+        Category = "RTS Character|Inputs|Movement",
         meta = (ClampMin = 1.f, UIMin = 1.f, ClampMax = 100.f, UIMax = 100.f))
     float MovementSpeed = 20.f;
 
@@ -165,7 +165,7 @@ public:
 
     /** Установить контроль управления через наведение мыши на Край Экрана */
     UFUNCTION(BlueprintCallable,
-        Category = "RTS_Character|Inputs|Movement")
+        Category = "RTS Character|Inputs|Movement")
     void SetScreenEdgeControl(bool Value)
     {
         bScreenEdgeControl = Value;
@@ -178,28 +178,28 @@ public:
 
     /* Диапазон Высоты Камеры */
     UPROPERTY(EditAnywhere,
-        Category = "RTS_Character|Inputs|Camera",
+        Category = "RTS Character|Inputs|Camera",
         meta = (DisplayName = "Range",
             ClampMin = 10, UIMin = 10, ClampMax = 50000, UIMax = 50000))
     FVector2D CameraHeight_Range = FVector2D(10, 5000);
 
     // Скорость изменения Высоты Камеры
     UPROPERTY(EditAnywhere,
-        Category = "RTS_Character|Inputs|Camera",
+        Category = "RTS Character|Inputs|Camera",
         meta = (DisplayName = "Change Speed",
             ClampMin = 0.1f, UIMin = 0.1f, ClampMax = 100, UIMax = 100))
     float CameraHeight_ChangeSpeed = 10;
 
     // Заданная высота камеры
     UPROPERTY(EditAnywhere,
-        Category = "RTS_Character|Inputs|Camera",
+        Category = "RTS Character|Inputs|Camera",
         meta = (DisplayName = "Setpoint",
             ClampMin = 10, UIMin = 10, ClampMax = 50000, UIMax = 50000))
     float CameraHeight_Setpoint = 2000;
 
     // Скорость изменения Задания высоты камеры
     UPROPERTY(EditAnywhere,
-        Category = "RTS_Character|Inputs|Camera",
+        Category = "RTS Character|Inputs|Camera",
         meta = (DisplayName = "Setpoint Change Speed",
             ClampMin = 0.01f, UIMin = 0.01f, ClampMax = 1, UIMax = 1))
     float CameraHeight_SetpointChangeSpeed = 0.1f;

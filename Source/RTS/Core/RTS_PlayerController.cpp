@@ -87,6 +87,44 @@ void ARTS_PlayerController::Destroyed()
 
     Super::Destroyed();
 }
+//--------------------------------------------------------------------------------------
+
+
+
+/* ---   Inputs | Actions   --- */
+
+void ARTS_PlayerController::SetupInputComponent()
+{
+    Super::SetupInputComponent();
+
+    /* ===   Actions   === */
+
+    /* ---   Actions | On-Screens   --- */
+
+    if (ActionGroups_OnScreenSelection != NAME_None)
+    {
+        InputComponent->BindAction(ActionGroups_OnScreenSelection, IE_Pressed, this, &ARTS_PlayerController::OnScreenSelection);
+        //InputComponent->BindAction(ActionGroups_OnScreenSelection, IE_Released, this, &ARTS_PlayerController::OnScreenSelection);
+    }
+
+    if (ActionGroups_OnScreenAction != NAME_None)
+    {
+        InputComponent->BindAction(ActionGroups_OnScreenAction, IE_Pressed, this, &ARTS_PlayerController::OnScreenAction);
+        //InputComponent->BindAction(ActionGroups_OnScreenAction, IE_Released, this, &ARTS_PlayerController::OnScreenAction);
+    }
+    //-------------------------------------------
+    //===========================================
+
+
+    /* ===   Axis   === */
+
+    /* ---   Axis | Test   --- */
+
+    //if (AxisGroups_Test != NAME_None)
+    //    InputComponent->BindAxis(AxisGroups_Test, this, &ARTS_PlayerController::Test);
+    //-------------------------------------------
+    //===========================================
+}
 
 bool ARTS_PlayerController::InputKey(FKey Key, EInputEvent EventType, float AmountDepressed, bool bGamepad)
 {
@@ -108,11 +146,7 @@ bool ARTS_PlayerController::InputKey(FKey Key, EInputEvent EventType, float Amou
                     const bool bHit = GetHitResultAtScreenPosition(MousePosition, CurrentClickTraceChannel, true, HitResultForActionGroups);
 
                     UPrimitiveComponent* ClickedPrimitive = nullptr;
-                    if (bEnableMouseOverEvents)
-                    {
-                        ClickedPrimitive = CurrentClickablePrimitive.Get();
-                    }
-                    else if (bHit)
+                    if (bHit)
                     {
                         ClickedPrimitive = HitResultForActionGroups.Component.Get();
                     }
@@ -143,6 +177,57 @@ bool ARTS_PlayerController::InputKey(FKey Key, EInputEvent EventType, float Amou
     }
 
     return bResult;
+}
+
+void ARTS_PlayerController::OnScreenSelection()
+{
+    if (AUnitCharacter* lUnit = Cast<AUnitCharacter>(HitResultForActionGroups.Actor))
+    {
+        if (lUnit->FractionNumber == FractionNumber)
+        {
+            if (ISelectableActorInterface::Execute_IsSelectedByPlayer(lUnit))
+            {
+                ISelectableActorInterface::Execute_SetSelectedByPlayer(lUnit, false);
+                SelectedAlliedUnits.Remove(lUnit);
+            }
+            else
+            {
+                ISelectableActorInterface::Execute_SetSelectedByPlayer(lUnit, true);
+                SelectedAlliedUnits.Add(lUnit);
+            }
+
+            return;
+        }
+    }
+
+    // При нажатии на пустую область стираем Массив Выбранных Союзных Юнитов 
+    ClearSelectedUnits();
+}
+
+void ARTS_PlayerController::OnScreenAction()
+{
+    if (ISelectableActorInterface::CheckImplementation(HitResultForActionGroups.Actor.Get()))
+    {
+        if (AUnitCharacter* lUnit = Cast<AUnitCharacter>(HitResultForActionGroups.Actor))
+        {
+            if (lUnit->FractionNumber == FractionNumber)
+            {
+                SetSelectedTargetActionActor(nullptr);
+            }
+            else
+            {
+                SetSelectedTargetActionActor(lUnit);
+            }
+        }
+        else
+        {
+            SetSelectedTargetActionActor(HitResultForActionGroups.Actor.Get());
+        }
+    }
+    else
+    {
+        SetSelectedTargetActionActor(nullptr);
+    }
 }
 //--------------------------------------------------------------------------------------
 
@@ -197,70 +282,7 @@ FORCEINLINE void ARTS_PlayerController::KeepMouseCentered()
 
 
 
-/* ---   Action   --- */
-
-TArray<FName> ARTS_PlayerController::GetActionsGroup(FKey Key)
-{
-    TArray<FName> ActualGroups;
-
-    if (SelectedActionGroups.Num())
-    {
-        UInputSettings* InputSettings = UInputSettings::GetInputSettings();
-        TArray<FInputActionKeyMapping> lArray;
-        lArray.Reserve(4);
-
-        // Пройтись по всем зарегистрированным группам
-        for (FName& NameGroup : SelectedActionGroups)
-        {
-            UInputSettings::GetInputSettings()->GetActionMappingByName(NameGroup, lArray);
-
-            // Поиск соответствующей клавиши
-            if (lArray.FindByPredicate([Key](const FInputActionKeyMapping& Item) { return Item.Key == Key; }))
-            {
-                ActualGroups.Add(NameGroup);
-            }
-
-            lArray.Empty(4);
-        }
-    }
-
-    return ActualGroups;
-}
-//--------------------------------------------------------------------------------------
-
-
-
 /* ---   Selectable Actor   --- */
-
-void ARTS_PlayerController::AddUnitToSelectedUnits(AActor* Unit)
-{
-    if (Cast<AUnitCharacter>(Unit)
-        && ((AUnitCharacter*)Unit)->FractionNumber == FractionNumber)
-    {
-        SelectedAlliedUnits.Add((AUnitCharacter*)Unit);
-    }
-    else
-    {
-        if (ISelectableActorInterface::CheckImplementation(SelectedActor))
-            ISelectableActorInterface::Execute_SetSelectedByPlayer(SelectedActor, false);
-        SelectedActor = Unit;
-    }
-}
-
-void ARTS_PlayerController::RemoveUnitFromSelectedUnits(AActor* Unit)
-{
-    if (Cast<AUnitCharacter>(Unit)
-        && ((AUnitCharacter*)Unit)->FractionNumber == FractionNumber)
-    {
-        SelectedAlliedUnits.Remove((AUnitCharacter*)Unit);
-    }
-    else
-    {
-        if (ISelectableActorInterface::CheckImplementation(SelectedActor))
-            ISelectableActorInterface::Execute_SetSelectedByPlayer(SelectedActor, false);
-        SelectedActor = nullptr;
-    }
-}
 
 void ARTS_PlayerController::ClearSelectedUnits()
 {
@@ -273,9 +295,26 @@ void ARTS_PlayerController::ClearSelectedUnits()
     }
     SelectedAlliedUnits.Empty();
 
-    if (ISelectableActorInterface::CheckImplementation(SelectedActor))
-        ISelectableActorInterface::Execute_SetSelectedByPlayer(SelectedActor, false);
-    SelectedActor = nullptr;
+    if (SelectedTargetActionActor)
+    {
+        ISelectableActorInterface::Execute_SetSelectedByPlayer(SelectedTargetActionActor, false);
+        SelectedTargetActionActor = nullptr;
+    }
+}
+
+void ARTS_PlayerController::SetSelectedTargetActionActor(AActor* TargetActor)
+{
+    if (SelectedTargetActionActor)
+    {
+        ISelectableActorInterface::Execute_SetSelectedByPlayer(SelectedTargetActionActor, false);
+    }
+
+    SelectedTargetActionActor = TargetActor;
+
+    if (SelectedTargetActionActor)
+    {
+        ISelectableActorInterface::Execute_SetSelectedByPlayer(SelectedTargetActionActor, true);
+    }
 }
 //--------------------------------------------------------------------------------------
 
@@ -296,45 +335,61 @@ void ARTS_PlayerController::PostEditChangeProperty(FPropertyChangedEvent& Proper
         ? PropertyChangedEvent.Property->GetFName()
         : NAME_None;
 
-    if (PropertyName == GET_MEMBER_NAME_CHECKED(ARTS_PlayerController, SelectedActionGroups))
+    if (PropertyName == GET_MEMBER_NAME_CHECKED(ARTS_PlayerController, ActionGroups_OtherScreenInteractions)
+        || PropertyName == GET_MEMBER_NAME_CHECKED(ARTS_PlayerController, ActionGroups_OnScreenSelection)
+        || PropertyName == GET_MEMBER_NAME_CHECKED(ARTS_PlayerController, ActionGroups_OnScreenAction))
     {
-        InitActionGroup();
+        UpdateClickEventKeys();
     }
 };
 //--------------------------------------------------------------------------------------
 
 
 
-/* ---   Actions   --- */
+/* ---   Inputs | Actions   --- */
 
-void ARTS_PlayerController::InitActionGroup()
+void ARTS_PlayerController::UpdateClickEventKeys()
 {
     ClickEventKeys.Empty();
 
-    if (SelectedActionGroups.Num())
+    UInputSettings* InputSettings = UInputSettings::GetInputSettings();
+    TArray<FInputActionKeyMapping> lArray;
+
+    if (ActionGroups_OnScreenSelection != NAME_None)
     {
-        UInputSettings* InputSettings = UInputSettings::GetInputSettings();
-        TArray<FInputActionKeyMapping> lArray;
+        InputSettings->GetActionMappingByName(ActionGroups_OnScreenSelection, lArray);
+    }
 
-        for (FName& NameGroup : SelectedActionGroups)
+    if (ActionGroups_OnScreenAction != NAME_None)
+    {
+        InputSettings->GetActionMappingByName(ActionGroups_OnScreenAction, lArray);
+    }
+
+    if (ActionGroups_OtherScreenInteractions.Num())
+    {
+        for (FName& NameGroup : ActionGroups_OtherScreenInteractions)
         {
-            InputSettings->GetActionMappingByName(NameGroup, lArray);
-
-            for (FInputActionKeyMapping& Data : lArray)
+            if (NameGroup != NAME_None)
             {
-                ClickEventKeys.AddUnique(Data.Key);
+                InputSettings->GetActionMappingByName(NameGroup, lArray);
             }
         }
     }
+
+    for (FInputActionKeyMapping& Data : lArray)
+    {
+        ClickEventKeys.AddUnique(Data.Key);
+    }
 }
 
-TArray<FName> ARTS_PlayerController::GetActionNames()
+TArray<FName> ARTS_PlayerController::GetActionGroupsNames()
 {
     UInputSettings* InputSettings = UInputSettings::GetInputSettings();
 
     TArray<FName> ActionNames;
 
     InputSettings->GetActionNames(ActionNames);
+    ActionNames.Add(NAME_None);
 
     return ActionNames;
 }

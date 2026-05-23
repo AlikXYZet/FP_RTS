@@ -119,6 +119,7 @@ void ARTS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
     /* ===   Actions   === */
 
     /* ---   Actions | Test   --- */
+
     //if (ActionGroups_Test != NAME_None)
     //{
     //    PlayerInputComponent->BindAction(ActionGroups_Test, IE_Pressed, this, &ACharacter::Test);
@@ -284,6 +285,7 @@ TArray<FName> ARTS_Character::GetActionGroupsNames()
     TArray<FName> ActionNames;
 
     UInputSettings::GetInputSettings()->GetActionNames(ActionNames);
+    ActionNames.Add(NAME_None);
 
     return ActionNames;
 }
@@ -293,6 +295,7 @@ TArray<FName> ARTS_Character::GetAxisGroupsNames()
     TArray<FName> AxisNames;
 
     UInputSettings::GetInputSettings()->GetAxisNames(AxisNames);
+    AxisNames.Add(NAME_None);
 
     return AxisNames;
 }
