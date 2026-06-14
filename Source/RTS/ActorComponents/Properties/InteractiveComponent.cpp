@@ -4,7 +4,7 @@
 #include "InteractiveComponent.h"
 
 // Macros:
-#include "RTS/Tools/GlobalMacros.h"
+#include "RTS/Tools/Global/GlobalMacros.h"
 
 // UE:
 #include "GameFramework/InputSettings.h"

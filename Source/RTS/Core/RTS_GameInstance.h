@@ -9,7 +9,7 @@
 #include "Engine/GameInstance.h"
 
 // Macros:
-#include "RTS/Tools/GlobalMacros.h"
+#include "RTS/Tools/Global/GlobalMacros.h"
 
 // Generated:
 #include "RTS_GameInstance.generated.h"
@@ -46,7 +46,7 @@ public:
     {
         if (!IsValid(CurrentGameInstance))
         {
-            RTS_LOG_Empty(Error,
+            M_LOG_Empty(Error,
                 "Current GameInstance is NOT 'URTS_GameInstance' class. "
                 "See 'Project Settings'/'Maps & Modes'/'Game Instance Class'");
 
@@ -139,19 +139,6 @@ private:
 /** Получить текущий экземпляр класса 'URTS_GameInstance' */
 FORCEINLINE static URTS_GameInstance* const GetRTSGameInstance()
 {
-#if WITH_EDITOR
-
-    if (!URTS_GameInstance::CurrentGameInstance)
-    {
-        return URTS_GameInstance::CurrentGameInstance = GEngine->GameViewport->GetWorld()->GetGameInstance<URTS_GameInstance>();
-    }
-    else
-
-#endif // WITH_EDITOR
-
-    {
-        // В режиме "Play In Editor" данный указатель очищается, однако стабильно работает в готовой сборке
-        return URTS_GameInstance::CurrentGameInstance;
-    }
+    return URTS_GameInstance::CurrentGameInstance;
 };
 //--------------------------------------------------------------------------------------

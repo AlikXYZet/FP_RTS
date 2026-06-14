@@ -35,7 +35,7 @@ public:
 
     /* ---   Base   --- */
 
-    /** Бфстрая Проверка Объекта на реализацию данного Интерфейса
+    /** Быстрая Проверка Объекта на реализацию данного Интерфейса
     @note   Вызов методов 'Execute_*' в Объекте без реализованного Интерфейса вызовет фатальную ошибку */
     FORCEINLINE static bool CheckImplementation(const UObject* O)
     {
@@ -45,7 +45,7 @@ public:
 
 
 
-    /* ---   Selection   --- */
+    /* ---   Interface: Selectable Actor   --- */
 
     /** Установить состояние "Выбранный" */
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable,

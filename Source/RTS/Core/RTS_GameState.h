@@ -9,7 +9,7 @@
 #include "GameFramework/GameStateBase.h"
 
 // Global:
-#include "RTS/Tools/GlobalMacros.h"
+#include "RTS/Tools/Global/GlobalMacros.h"
 
 // Generated:
 #include "RTS_GameState.generated.h"
@@ -46,7 +46,7 @@ public:
     {
         if (!IsValid(CurrentGameState))
         {
-            RTS_LOG_Empty(Error,
+            M_LOG_Empty(Error,
                 "Current GameState is NOT 'ARTS_GameStateBase' class. "
                 "See Settings of current 'Game Mode'");
 
@@ -141,19 +141,6 @@ private:
 /** Получить текущий экземпляр класса 'ARTS_GameState' */
 FORCEINLINE static ARTS_GameStateBase* const GetRTSGameState()
 {
-#if WITH_EDITOR
-
-    if (!ARTS_GameStateBase::CurrentGameState)
-    {
-        return ARTS_GameStateBase::CurrentGameState = GEngine->GameViewport->GetWorld()->GetGameState<ARTS_GameStateBase>();
-    }
-    else
-
-#endif // WITH_EDITOR
-
-    {
-        // В режиме "Play In Editor" данный указатель очищается, однако стабильно работает в готовой сборке
-        return ARTS_GameStateBase::CurrentGameState;
-    }
+    return ARTS_GameStateBase::CurrentGameState;
 };
 //--------------------------------------------------------------------------------------

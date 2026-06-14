@@ -9,7 +9,7 @@
 #include "GameFramework/PlayerController.h"
 
 // Global:
-#include "RTS/Tools/GlobalMacros.h"
+#include "RTS/Tools/Global/GlobalMacros.h"
 
 // Generated:
 #include "RTS_PlayerController.generated.h"
@@ -49,7 +49,7 @@ public:
     {
         if (!IsValid(CurrentLocalController))
         {
-            RTS_LOG_Empty(Error,
+            M_LOG_Empty(Error,
                 "Current GameState is NOT 'ARTS_GameStateBase' class. "
                 "See Settings of current 'Game Mode'");
 
@@ -202,7 +202,7 @@ public:
     /* ---   Action   --- */
 
     /* Результат Попадания для Групп Действий отслеживаемых Клавиш */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite,
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite,
         Category = "RTS Player Controller|Action")
     FHitResult HitResultForActionGroups;
     //-------------------------------------------
@@ -212,19 +212,19 @@ public:
     /* ---   Selectable Actor   --- */
 
     /* Массив Выбранных Союзных Юнитов */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite,
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite,
         Category = "RTS Player Controller|Selectable Actor")
     TSet<AUnitCharacter*> SelectedAlliedUnits;
 
     /* Выбранный Актор целевого Действия */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite,
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite,
         Category = "RTS Player Controller|Selectable Actor")
-    AActor* SelectedTargetActionActor;
+    AActor* SelectedTargetActionActor = nullptr;
 
     /* Номер Фракции данного Юнита */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
         Category = "RTS Player Controller|Selectable Actor")
-    uint8 FractionNumber = 0;
+    uint8 TeamID = 0;
 
     //
 
@@ -330,30 +330,6 @@ public:
 /** Получить текущий Локальный Контроллер класса 'ARTS_PlayerController' */
 FORCEINLINE static ARTS_PlayerController* const GetRTSLocalController()
 {
-#if WITH_EDITOR
-
-    if (!ARTS_PlayerController::CurrentLocalController)
-    {
-        for (FConstPlayerControllerIterator Iterator = GEngine->GameViewport->GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
-        {
-            if (APlayerController* PlayerController = Iterator->Get())
-            {
-                // Проверка локальности контроллера
-                if (Cast<ULocalPlayer>(PlayerController->Player))
-                {
-                    return ARTS_PlayerController::CurrentLocalController = Cast<ARTS_PlayerController>(PlayerController);
-                }
-            }
-        }
-        return ARTS_PlayerController::CurrentLocalController;
-    }
-    else
-
-#endif // WITH_EDITOR
-
-    {
-        // В режиме "Play In Editor" данный указатель очищается, однако стабильно работает в готовой сборке
-        return ARTS_PlayerController::CurrentLocalController;
-    }
+    return ARTS_PlayerController::CurrentLocalController;
 };
 //--------------------------------------------------------------------------------------

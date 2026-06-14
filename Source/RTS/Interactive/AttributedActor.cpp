@@ -4,19 +4,17 @@
 #include "AttributedActor.h"
 
 // Macros:
-#include "RTS/Tools/GlobalMacros.h"
-
-// Net:
-#include "Net/UnrealNetwork.h"
+#include "RTS/Tools/Global/GlobalMacros.h"
 
 // GAS:
 #include "RTS/GAS/RTS_AttributeSet.h"
 
 // UE:
 #include "Engine/Classes/Components/DecalComponent.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 
 // Interaction:
-#include "RTS/Core/RTS_PlayerController.h"
+#include "RTS/ActorComponents/Properties/InteractiveComponent.h"
 //--------------------------------------------------------------------------------------
 
 
@@ -53,11 +51,13 @@ AAttributedActor::AAttributedActor()
     StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
     StaticMesh->SetupAttachment(RootComponent);
     StaticMesh->SetCollisionProfileName(ProfileName_Destructible);
+    StaticMesh->SetCustomDepthStencilValue(1);
+    StaticMesh->bReceivesDecals = false;
 
     // Декаль выделения данного Персонажа
     Decal = CreateDefaultSubobject<UDecalComponent>(TEXT("Decal"));
     Decal->SetupAttachment(RootComponent);
-    Decal->SetRelativeLocation(FVector(0.f, 0.f, -85.f));
+    //Decal->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
     Decal->SetUsingAbsoluteRotation(true);
     Decal->SetRelativeRotation(FRotator(90.f, 0.f, 0.f));
     Decal->SetRelativeScale3D(FVector(0.3f));
@@ -66,6 +66,14 @@ AAttributedActor::AAttributedActor()
 
 
     /* ---   Non-scene Components   --- */
+
+    // Компонент Интерактивности с данным Юнитом
+    InteractiveComponent = CreateDefaultSubobject<UInteractiveComponent>(TEXT("Interactive Component"));
+
+    // Компонент "стимуляции" Сенсорики
+    AIPerceptionStimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("AIPerception: Stimuli Source"));
+    // PS: 'UAIPerceptionStimuliSourceComponent' не предоставляет изменение его параметров (отмечены как 'protected')
+    // Рекомендация: Перейти в среду 'Blueprint' или Создать дочерний класс-оболочку с методами изменения необходимых параметров
 
     // Компонент Системы Способностей (GAS)
     AbilitySystemComp = CreateDefaultSubobject<URTS_AbilitySystemComponent>(TEXT("Ability System Comp"));
@@ -125,7 +133,7 @@ void AAttributedActor::InitAbilitySystemComp()
     }
     else
     {
-        RTS_Error("AbilitySystemComp is NOT");
+        M_Error("AbilitySystemComp is NOT");
     }
 }
 //--------------------------------------------------------------------------------------
@@ -136,7 +144,7 @@ void AAttributedActor::InitAbilitySystemComp()
 
 TArray<FComponentRendering> AAttributedActor::GetUsedComponents_Implementation()
 {
-    return TArray<FComponentRendering>{ FComponentRendering(StaticMesh) };
+    return TArray<FComponentRendering>{ FComponentRendering(StaticMesh, 1) };
 }
 //--------------------------------------------------------------------------------------
 

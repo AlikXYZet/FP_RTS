@@ -28,7 +28,8 @@ struct FComponentRendering
     /* ---   Constructors   --- */
 
     FComponentRendering() {};
-    FComponentRendering(UPrimitiveComponent* UsedComponent) : Component(UsedComponent) {};
+    FComponentRendering(UPrimitiveComponent* UsedComponent, uint8 Depth = 0)
+        : Component(UsedComponent), DepthStencilValue(Depth) {};
     //-------------------------------------------
 
 

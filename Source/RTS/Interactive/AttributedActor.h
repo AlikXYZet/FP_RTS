@@ -10,6 +10,7 @@
 
 // Interfaces:
 #include "AbilitySystemInterface.h"
+#include "GenericTeamAgentInterface.h"
 #include "RTS/Tools/Interfaces/Properties/InteractiveInterface.h"
 #include "RTS/Tools/Interfaces/Properties/SelectableActorInterface.h"
 
@@ -24,14 +25,21 @@
 
 /* ---   Pre-declaration of classes   --- */
 
+// UE:
+class UAIPerceptionStimuliSourceComponent;
+
 // Interaction | GAS:
 class URTS_AttributeSet;
+
+// Interaction:
+class UInteractiveComponent;
 //--------------------------------------------------------------------------------------
 
 
 
 UCLASS()
-class RTS_API AAttributedActor : public AActor, public IAbilitySystemInterface, public IInteractiveInterface, public ISelectableActorInterface
+class RTS_API AAttributedActor : public AActor,
+    public IAbilitySystemInterface, public IInteractiveInterface, public ISelectableActorInterface, public IGenericTeamAgentInterface
 {
     GENERATED_BODY()
 
@@ -64,13 +72,25 @@ public:
 
     /* ---   Non-scene Components   --- */
 
-    // Компонент Системы Способностей (GAS)
+    /* Компонент Интерактивности с данным Актором */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly,
+        Category = "Components",
+        meta = (AllowPrivateAccess = "true"))
+    UInteractiveComponent* InteractiveComponent = nullptr;
+
+    /* Компонент "стимуляции" Сенсорики */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly,
+        Category = "Components",
+        meta = (AllowPrivateAccess = "true"))
+    UAIPerceptionStimuliSourceComponent* AIPerceptionStimuliSource = nullptr;
+
+    /* Компонент Системы Способностей (GAS) */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly,
         Category = "Components",
         meta = (AllowPrivateAccess = "true"))
     URTS_AbilitySystemComponent* AbilitySystemComp = nullptr;
 
-    // Скрытый Набор Атрибутов (для GAS)
+    /* Скрытый Набор Атрибутов (для GAS) */
     UPROPERTY(BlueprintReadOnly,
         Category = "Components")
     URTS_AttributeSet* AttributeSet = nullptr;
@@ -178,11 +198,38 @@ public:
 
 
 
+    /* ---   Interface: Generic Team Agent   --- */
+
+    /** Присваивает агенту команды заданный TeamID */
+    UFUNCTION(BlueprintCallable,
+        Category = "Generic Team Agent")
+    virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override
+    {
+        TeamID = NewTeamID;
+    };
+
+    /** Извлекает идентификатор команды в виде FGenericTeamId */
+    UFUNCTION(BlueprintCallable,
+        Category = "Generic Team Agent")
+    virtual FGenericTeamId GetGenericTeamId() const override { return TeamID; }
+    //-------------------------------------------
+
+
+
 private:
 
     /* ---   GAS   --- */
 
     /** Инициализация данных AbilitySystemComp */
     void InitAbilitySystemComp();
+    //-------------------------------------------
+
+
+
+    /* ---   Interface: Generic Team Agent   --- */
+
+    UPROPERTY(EditAnywhere,
+        Category = "Generic Team Agent")
+    FGenericTeamId TeamID;
     //-------------------------------------------
 };

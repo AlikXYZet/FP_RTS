@@ -9,7 +9,7 @@
 #include "GameFramework/GameModeBase.h"
 
 // Macros:
-#include "RTS/Tools/GlobalMacros.h"
+#include "RTS/Tools/Global/GlobalMacros.h"
 
 // Generated:
 #include "RTS_GameMode.generated.h"
@@ -46,7 +46,7 @@ public:
     {
         if (!IsValid(CurrentGameMode))
         {
-            RTS_LOG_Empty(Error,
+            M_LOG_Empty(Error,
                 "Current GameMode is NOT 'ARTS_GameModeBase' class. "
                 "See 'World Settings'");
 
@@ -138,19 +138,6 @@ private:
 /** Получить текущий экземпляр класса 'ARTS_GameModeBase' */
 FORCEINLINE static ARTS_GameModeBase* const GetRTSGameMode()
 {
-#if WITH_EDITOR
-
-    if (!ARTS_GameModeBase::CurrentGameMode)
-    {
-        return ARTS_GameModeBase::CurrentGameMode = GEngine->GameViewport->GetWorld()->GetAuthGameMode<ARTS_GameModeBase>();
-    }
-    else
-
-#endif // WITH_EDITOR
-
-    {
-        // В режиме "Play In Editor" данный указатель очищается, однако стабильно работает в готовой сборке
-        return ARTS_GameModeBase::CurrentGameMode;
-    }
+    return ARTS_GameModeBase::CurrentGameMode;
 };
 //--------------------------------------------------------------------------------------

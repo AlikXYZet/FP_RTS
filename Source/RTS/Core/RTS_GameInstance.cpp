@@ -99,7 +99,7 @@ void URTS_GameInstance::InitSettingsSaving()
             }
             else
             {
-                RTS_Error("MusicSoundClass is NOT");
+                M_Error("MusicSoundClass is NOT");
             }
 
             if (EffectsSoundClass)
@@ -114,12 +114,12 @@ void URTS_GameInstance::InitSettingsSaving()
             }
             else
             {
-                RTS_Error("EffectsSoundClass is NOT");
+                M_Error("EffectsSoundClass is NOT");
             }
         }
         else
         {
-            RTS_Error("SoundMix is NOT");
+            M_Error("SoundMix is NOT");
         }
         //-------------------------------------------
     }

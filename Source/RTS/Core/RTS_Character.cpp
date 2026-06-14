@@ -4,7 +4,7 @@
 #include "RTS_Character.h"
 
 // Macros:
-#include "RTS/Tools/GlobalMacros.h"
+#include "RTS/Tools/Global/GlobalMacros.h"
 
 // UE:
 #include "Camera/CameraComponent.h"
@@ -94,7 +94,7 @@ void ARTS_Character::PossessedBy(AController* NewController)
     }
     else
     {
-        RTS_Error("'NewController' is NOT 'ARTS_PlayerController'");
+        M_Error("'NewController' is NOT 'ARTS_PlayerController'");
     }
 }
 
@@ -313,12 +313,12 @@ void ARTS_Character::CheckInputsGroups()
     //{
     //    if (Data == NAME_None)
     //    {
-    //        RTS_LOG(Warning, "Not used at least one of the Actions ('%s')",
+    //        M_LOG(Warning, "Not used at least one of the Actions ('%s')",
     //            *Data.ToString());
     //    }
     //    else if (lArray_ActionNames.Find(Data) == INDEX_NONE)
     //    {
-    //        RTS_Error("'%s' is NOT an Action",
+    //        M_Error("'%s' is NOT an Action",
     //            *Data.ToString());
     //    }
     //}
@@ -335,12 +335,12 @@ void ARTS_Character::CheckInputsGroups()
     {
         if (Data == NAME_None)
         {
-            RTS_LOG(Warning, "Not used at least one of the Axes ('%s')",
+            M_LOG(Warning, "Not used at least one of the Axes ('%s')",
                 *Data.ToString());
         }
         else if (lArray_AxisNames.Find(Data) == INDEX_NONE)
         {
-            RTS_Error("'%s' is NOT an Axis",
+            M_Error("'%s' is NOT an Axis",
                 *Data.ToString());
         }
     }

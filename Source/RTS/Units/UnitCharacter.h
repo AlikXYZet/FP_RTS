@@ -10,8 +10,13 @@
 
 // Interfaces:
 #include "AbilitySystemInterface.h"
+#include "GenericTeamAgentInterface.h"
 #include "RTS/Tools/Interfaces/Properties/InteractiveInterface.h"
 #include "RTS/Tools/Interfaces/Properties/SelectableActorInterface.h"
+#include "RTS/Tools/Interfaces/Properties/UnitCharacterDataInterface.h"
+
+// Structs:
+#include "RTS/Tools/Structs/Properties/UnitCharacterData.h"
 
 // GAS:
 #include "RTS/GAS/RTS_AbilitySystemComponent.h"
@@ -24,9 +29,6 @@
 
 /* ---   Pre-declaration of classes   --- */
 
-// UE:
-class UDecalComponent;
-
 // Interaction | GAS:
 class URTS_AttributeSet;
 
@@ -37,7 +39,9 @@ class UInteractiveComponent;
 
 
 UCLASS()
-class RTS_API AUnitCharacter : public ACharacter, public IAbilitySystemInterface, public IInteractiveInterface, public ISelectableActorInterface
+class RTS_API AUnitCharacter : public ACharacter,
+    /* UE4: */  public IAbilitySystemInterface, public IGenericTeamAgentInterface,
+    /* RTS: */  public IInteractiveInterface, public ISelectableActorInterface, public IUnitCharacterDataInterface
 {
     GENERATED_BODY()
 
@@ -110,6 +114,11 @@ public:
 
     /** Вызывается перед инициализацией всех компонентов */
     virtual void PreInitializeComponents() override;
+
+    /** Вызывается при подключения Контроллера
+    @note   Вызывается только на сервере (или в автономном режиме)
+    @param  NewController - Контроллер, захвативший владение данным Игроком (Пешкой) */
+    virtual void PossessedBy(AController* NewController) override;
     //-------------------------------------------
 
 
@@ -195,11 +204,44 @@ public:
 
 
     /* ---   Selectable Actor   --- */
+    //-------------------------------------------
 
-    /* Номер Фракции данного Юнита */
+
+
+    /* ---   Interface: Generic Team Agent   --- */
+
+    /** Присваивает агенту команды заданный TeamID */
+    UFUNCTION(BlueprintCallable,
+        Category = "Generic Team Agent")
+    virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override
+    {
+        TeamID = NewTeamID;
+    };
+
+    /** Извлекает идентификатор команды в виде FGenericTeamId */
+    UFUNCTION(BlueprintCallable,
+        Category = "Generic Team Agent")
+    virtual FGenericTeamId GetGenericTeamId() const override { return TeamID; }
+    //-------------------------------------------
+
+
+
+    /* ---   Unit Character Data   --- */
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
-        Category = "Unit Character|Selection")
-    uint8 FractionNumber = 0;
+        Category = "AI Unit")
+    FUnitCharacterData UnitCharacterData;
+    //-------------------------------------------
+
+
+
+    /* ---   Interface: Test  --- */
+
+    /** Test */
+    virtual void GetTest_Implementation(FUnitCharacterData& Value) override
+    {
+        Value = UnitCharacterData;
+    };
     //-------------------------------------------
 
 
@@ -219,5 +261,14 @@ private:
     /** Событие: При Нулевом Здоровье */
     UFUNCTION()
     void OnZeroHealth();
+    //-------------------------------------------
+
+
+
+    /* ---   Generic Team Agent   --- */
+
+    UPROPERTY(EditAnywhere,
+        Category = "Generic Team Agent")
+    FGenericTeamId TeamID;
     //-------------------------------------------
 };

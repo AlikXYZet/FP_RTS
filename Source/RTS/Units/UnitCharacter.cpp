@@ -4,20 +4,20 @@
 #include "UnitCharacter.h"
 
 // Macros:
-#include "RTS/Tools/GlobalMacros.h"
-#include "RTS/Tools/GlobalFunctions.h"
+#include "RTS/Tools/Global/GlobalFunctions.h"
+#include "RTS/Tools/Global/GlobalMacros.h"
 
 // GAS:
 #include "RTS/GAS/RTS_AttributeSet.h"
 
 // UE:
+#include "AIController.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/Classes/Components/DecalComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Interaction:
 #include "RTS/ActorComponents/Properties/InteractiveComponent.h"
-#include "RTS/Core/RTS_PlayerController.h"
 //--------------------------------------------------------------------------------------
 
 
@@ -37,7 +37,7 @@ AUnitCharacter::AUnitCharacter()
 {
     // Set this pawn to call Tick() every frame.
     // You can turn this off to improve performance if you don't need it.
-    PrimaryActorTick.bCanEverTick = false; // Принудительно
+    PrimaryActorTick.bCanEverTick = false; // Предварительно
     SetActorTickInterval(1.f); // 1 раз/сек.
     //-------------------------------------------
 
@@ -124,6 +124,16 @@ void AUnitCharacter::PreInitializeComponents()
     // является решением ошибки, описанной в UE-81109:
     // "уничтожение сборщиком AttributeSet у дубликатов актора-владельца"
 }
+
+void AUnitCharacter::PossessedBy(AController* NewController)
+{
+    Super::PossessedBy(NewController);
+
+    if (AAIController* AIC = Cast<AAIController>(NewController))
+    {
+        AIC->SetGenericTeamId(TeamID);
+    }
+}
 //--------------------------------------------------------------------------------------
 
 
@@ -132,7 +142,7 @@ void AUnitCharacter::PreInitializeComponents()
 
 TArray<FComponentRendering> AUnitCharacter::GetUsedComponents_Implementation()
 {
-    return TArray<FComponentRendering>{ FComponentRendering(GetMesh()) };
+    return TArray<FComponentRendering>{ FComponentRendering(GetMesh(), TeamID) };
 }
 //--------------------------------------------------------------------------------------
 
@@ -162,7 +172,7 @@ void AUnitCharacter::InitAbilitySystemComp()
     }
     else
     {
-        RTS_Error("AbilitySystemComp is NOT");
+        M_Error("AbilitySystemComp is NOT");
     }
 }
 //--------------------------------------------------------------------------------------

@@ -183,7 +183,7 @@ void ARTS_PlayerController::OnScreenSelection()
 {
     if (AUnitCharacter* lUnit = Cast<AUnitCharacter>(HitResultForActionGroups.Actor))
     {
-        if (lUnit->FractionNumber == FractionNumber)
+        if (lUnit->GetGenericTeamId() == TeamID)
         {
             if (ISelectableActorInterface::Execute_IsSelectedByPlayer(lUnit))
             {
@@ -210,7 +210,7 @@ void ARTS_PlayerController::OnScreenAction()
     {
         if (AUnitCharacter* lUnit = Cast<AUnitCharacter>(HitResultForActionGroups.Actor))
         {
-            if (lUnit->FractionNumber == FractionNumber)
+            if (lUnit->GetGenericTeamId() == TeamID)
             {
                 SetSelectedTargetActionActor(nullptr);
             }

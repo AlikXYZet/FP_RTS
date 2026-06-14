@@ -4,14 +4,17 @@
 #include "RTS_AttributeSet.h"
 
 // Macros:
-#include "RTS/Tools/GlobalMacros.h"
+#include "RTS/Tools/Global/GlobalMacros.h"
 
 // Net:
 #include "Net/UnrealNetwork.h"
 
+// UE:
+#include "Perception/AISense_Damage.h"
+
 // GAS:
-#include "RTS/Tools/GAS/RTS_GameplayTags.h"
 #include "GameplayEffectExtension.h"
+#include "RTS/Tools/GAS/RTS_GameplayTags.h"
 
 // Interaction:
 //#include "RTS/Core/RTS_GameMode.h"
@@ -65,6 +68,38 @@ void URTS_AttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
         //}
 
         bIsZeroHealth = false;
+    }
+
+    // Передача информации о уроне
+    if (Data.EvaluatedData.Magnitude < 0)
+    {
+        if (Data.EvaluatedData.Attribute == GetArmorAttribute()
+            || Data.EvaluatedData.Attribute == GetHealthAttribute())
+        {
+            AActor* lOwningActor = GetOwningActor();
+            FVector lLocation = lOwningActor->GetActorLocation();
+            AActor* lInstigator = Data.EffectSpec.GetEffectContext().Get()->GetInstigator();
+
+            // Информирование Актора средствами UE
+            // PS: Излишне, так как используются уже встроенные средства GAS
+            //UGameplayStatics::ApplyDamage(
+            //    lOwningActor,
+            //    Data.EvaluatedData.Magnitude,
+            //    lInstigator ? lInstigator->GetInstigatorController() : nullptr,
+            //    lInstigator,
+            //    NULL);
+
+            // Информирование ИИ
+            UAISense_Damage::ReportDamageEvent(
+                GetWorld(),
+                lOwningActor,   // Кому урон
+                lInstigator,    // Кто нанёс урон
+                Data.EvaluatedData.Magnitude,   // Величина урона
+                lInstigator ? lInstigator->GetActorLocation() : lLocation,  // Место события
+                lLocation);     // Место попадания
+            // PS: Параметр "Место события" ("Event Location") используется как
+            // местоположение "Инициатора" ("Instigator") на момент совершения события
+        }
     }
 }
 

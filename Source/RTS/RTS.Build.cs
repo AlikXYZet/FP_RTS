@@ -19,21 +19,24 @@ public class RTS : ModuleRules
             // Core:
             "PhysicsCore",
 
-            // Niagara
+            // Niagara:
             "Niagara",
             "NiagaraCore",
 
-            // Gameplay Ability System
+            // Gameplay Ability System (GAS):
             "GameplayAbilities",
             "GameplayTags",
             "GameplayTasks",
+
+            // AI Sense:
+            "AIModule"
         });
 
         if (Target.bBuildEditor)
         {
             PrivateDependencyModuleNames.AddRange(new string[] {
 
-            // Scripting
+            // Scripting:
             "EditorScriptingUtilitiesExpansion",
             });
         }
