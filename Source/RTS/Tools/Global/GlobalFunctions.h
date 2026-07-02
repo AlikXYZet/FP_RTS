@@ -23,6 +23,13 @@
 
 /* ---   constexpr: Шаблоны проверки соответствия типа на уровне компилятора   --- */
 
+/* Используются следующим способом:
+    @param  is_check    -- Требуемая проверка соответствия
+    @param  T           -- Класс, требующий выбранной проверки
+
+    template<class T, class = std::enable_if_t<is_check<T>>>
+*/
+
 /** Является ли классом типа 'AActor' */
 template<class T>
 constexpr bool is_Actor = std::is_convertible<T*, AActor*>::value;

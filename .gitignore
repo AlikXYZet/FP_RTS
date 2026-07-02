@@ -146,3 +146,5 @@ Plugins/**/Intermediate/*
 *.opendb
 Developer
 
+# Used as temporary Tool Files
+Content/Tools/

@@ -59,7 +59,25 @@ class RTS_API UBlueprintGlobalFunctions : public UBlueprintFunctionLibrary
 
     /** Конвертация (преобразование) Объекта в требуемый Класс
 
-    @note   Используется как замена 'Cast' при явно известном Классе.
+    @note   Используется как замена 'Cast' и Интерфейса при явно известном Классе Объекта и при уверенности его Валидности.
+    В противном случае, может вызвать Ошибки использования памяти.
+
+    @param  InObject -- Объект, требующий конвертации
+    @param  ObjectClass -- Класс конвертации
+
+    @return Сконвертируемый Объект */
+    UFUNCTION(BlueprintPure,
+        Category = "Utilities|Object",
+        meta = (DisplayName = "Convert Object to Class", ReturnDisplayName = "Out Object",
+            ObjectClass = "Actor", DeterminesOutputType = "ObjectClass"))
+    static UObject* ConvertObjectToClass(
+        UPARAM(ref) UObject* InObject,
+        TSubclassOf<UObject> ObjectClass);
+
+
+    /** Конвертация (преобразование) Объекта в требуемый Класс
+
+    @note   Используется как замена 'Cast' и Интерфейса при явно известном Классе.
     В противном случае, может вызвать Ошибки использования памяти.
 
     @param  InObject -- Объект, требующий конвертации
@@ -69,36 +87,33 @@ class RTS_API UBlueprintGlobalFunctions : public UBlueprintFunctionLibrary
     @return Валиден ли Сконвертируемый Объект 'Out Object' */
     UFUNCTION(BlueprintCallable,
         Category = "Utilities|Object",
-        meta = (DisplayName = "Convert Object to Class", ExpandEnumAsExecs = "ReturnValue",
+        meta = (DisplayName = "Convert Valid Object to Class", ExpandEnumAsExecs = "ReturnValue",
             ObjectClass = "Actor", DeterminesOutputType = "ObjectClass", DynamicOutputParam = "OutObject"))
-    static EIsValid ConvertObjectToClass(
+    static EIsValid ConvertValidObjectToClass(
         UPARAM(ref) UObject* InObject,
         TSubclassOf<UObject> ObjectClass,
         UObject*& OutObject);
-    //-------------------------------------------
 
 
+    /** Конвертация (преобразование) Массива Объектов в требуемый Класс
 
-    /* ---   AActor   --- */
+    @note   Используется как замена 'Cast' и Интерфейса при явно известном Классе Объектов и при уверенности их Валидности.
+    В противном случае, может вызвать Ошибки использования памяти.
 
-    /** Конвертация (преобразование) Актора в требуемый Класс
+    @param  InArray -- Массив, требующий конвертации
+    @param  ObjectsClass -- Класс конвертации
 
-    @note   Необходим как замена 'Cast' при частом использовании, но может вызвать Ошибки использования памяти.
-    Следует использовать, если 'In Actor' явно имеет класс, указанный в 'Actor Class' или дочерний ему.
-
-    @param  InActor -- Актор, требующий конвертации
-    @param  ActorClass -- Класс конвертации
-    @param  OutActor -- Сконвертируемый Актор
-
-    @return Валиден ли Сконвертируемый Актор 'Out Actor' */
-    UFUNCTION(BlueprintCallable,
-        Category = "Utilities|Actor",
-        meta = (DisplayName = "Convert Actor to Class", ExpandEnumAsExecs = "ReturnValue",
-            ActorClass = "Actor", DeterminesOutputType = "ActorClass", DynamicOutputParam = "OutActor"))
-    static EIsValid ConvertActorToClass(
-        UPARAM(ref) AActor* InActor,
-        TSubclassOf<AActor> ActorClass,
-        AActor*& OutActor);
+    @return Сконвертируемый Массив */
+    UFUNCTION(BlueprintPure,
+        Category = "Utilities|Object",
+        meta = (DisplayName = "Convert Array to Class", ReturnDisplayName = "Out Array",
+            ObjectsClass = "Actor", DeterminesOutputType = "ObjectsClass"))
+    static TArray<UObject*> ConvertArrayToClass(
+        UPARAM(ref) TArray<UObject*> InArray,
+        TSubclassOf<UObject> ObjectsClass)
+    {
+        return InArray;
+    };
     //-------------------------------------------
 };
 //--------------------------------------------------------------------------------------
