@@ -82,17 +82,17 @@ class RTS_API UBlueprintGlobalFunctions : public UBlueprintFunctionLibrary
 
     @param  InObject -- Объект, требующий конвертации
     @param  ObjectClass -- Класс конвертации
-    @param  OutObject -- Сконвертируемый Объект
+    @param  Validity -- Валиден ли Сконвертируемый Объект
 
-    @return Валиден ли Сконвертируемый Объект 'Out Object' */
+    @return Сконвертируемый Объект */
     UFUNCTION(BlueprintCallable,
         Category = "Utilities|Object",
-        meta = (DisplayName = "Convert Valid Object to Class", ExpandEnumAsExecs = "ReturnValue",
-            ObjectClass = "Actor", DeterminesOutputType = "ObjectClass", DynamicOutputParam = "OutObject"))
-    static EIsValid ConvertValidObjectToClass(
+        meta = (DisplayName = "Convert Valid Object to Class", ReturnDisplayName = "Out Object", ExpandEnumAsExecs = "Validity",
+            ObjectClass = "Actor", DeterminesOutputType = "ObjectClass"))
+    static UObject* ConvertValidObjectToClass(
         UPARAM(ref) UObject* InObject,
         TSubclassOf<UObject> ObjectClass,
-        UObject*& OutObject);
+        EIsValid& Validity);
 
 
     /** Конвертация (преобразование) Массива Объектов в требуемый Класс
@@ -113,6 +113,27 @@ class RTS_API UBlueprintGlobalFunctions : public UBlueprintFunctionLibrary
         TSubclassOf<UObject> ObjectsClass)
     {
         return InArray;
+    };
+
+
+    /** Конвертация (преобразование) Набора Объектов в требуемый Класс
+
+    @note   Используется как замена 'Cast' и Интерфейса при явно известном Классе Объектов и при уверенности их Валидности.
+    В противном случае, может вызвать Ошибки использования памяти.
+
+    @param  InSet -- Набор, требующий конвертации
+    @param  ObjectsClass -- Класс конвертации
+
+    @return Сконвертируемый Набор */
+    UFUNCTION(BlueprintPure,
+        Category = "Utilities|Object",
+        meta = (DisplayName = "Convert Set to Class", ReturnDisplayName = "Out Set",
+            ObjectsClass = "Actor", DeterminesOutputType = "ObjectsClass"))
+    static TSet<UObject*> ConvertSetToClass(
+        UPARAM(ref) TSet<UObject*> InSet,
+        TSubclassOf<UObject> ObjectsClass)
+    {
+        return InSet;
     };
     //-------------------------------------------
 };

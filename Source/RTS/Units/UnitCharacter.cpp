@@ -39,6 +39,8 @@ AUnitCharacter::AUnitCharacter()
     // You can turn this off to improve performance if you don't need it.
     PrimaryActorTick.bCanEverTick = false; // Предварительно
     SetActorTickInterval(1.f); // 1 раз/сек.
+
+    bUseControllerRotationYaw = false;
     //-------------------------------------------
 
 

@@ -13,7 +13,6 @@
 #include "GenericTeamAgentInterface.h"
 #include "RTS/Tools/Interfaces/Properties/InteractiveInterface.h"
 #include "RTS/Tools/Interfaces/Properties/SelectableActorInterface.h"
-#include "RTS/Tools/Interfaces/Properties/UnitCharacterDataInterface.h"
 
 // Structs:
 #include "RTS/Tools/Structs/Properties/UnitCharacterData.h"
@@ -41,7 +40,7 @@ class UInteractiveComponent;
 UCLASS()
 class RTS_API AUnitCharacter : public ACharacter,
     /* UE4: */  public IAbilitySystemInterface, public IGenericTeamAgentInterface,
-    /* RTS: */  public IInteractiveInterface, public ISelectableActorInterface, public IUnitCharacterDataInterface
+    /* RTS: */  public IInteractiveInterface, public ISelectableActorInterface
 {
     GENERATED_BODY()
 
@@ -231,17 +230,6 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
         Category = "AI Unit")
     FUnitCharacterData UnitCharacterData;
-    //-------------------------------------------
-
-
-
-    /* ---   Interface: Test  --- */
-
-    /** Test */
-    virtual void GetTest_Implementation(FUnitCharacterData& Value) override
-    {
-        Value = UnitCharacterData;
-    };
     //-------------------------------------------
 
 
