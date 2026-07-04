@@ -228,7 +228,7 @@ public:
     /* ---   Unit Character Data   --- */
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
-        Category = "AI Unit")
+        Category = "Unit Data")
     FUnitCharacterData UnitCharacterData;
     //-------------------------------------------
 

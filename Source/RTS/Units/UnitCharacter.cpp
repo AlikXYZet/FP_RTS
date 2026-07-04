@@ -18,6 +18,7 @@
 
 // Interaction:
 #include "RTS/ActorComponents/Properties/InteractiveComponent.h"
+#include "RTS/Core/RTS_PlayerController.h"
 //--------------------------------------------------------------------------------------
 
 
@@ -144,7 +145,7 @@ void AUnitCharacter::PossessedBy(AController* NewController)
 
 TArray<FComponentRendering> AUnitCharacter::GetUsedComponents_Implementation()
 {
-    return TArray<FComponentRendering>{ FComponentRendering(GetMesh(), TeamID) };
+    return TArray<FComponentRendering>{ FComponentRendering(GetMesh(), TeamID ? 1 : 0) };
 }
 //--------------------------------------------------------------------------------------
 
