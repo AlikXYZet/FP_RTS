@@ -330,6 +330,34 @@ public:
 /** Получить текущий Локальный Контроллер класса 'ARTS_PlayerController' */
 FORCEINLINE static ARTS_PlayerController* const GetRTSLocalController()
 {
+#if WITH_EDITOR
+
+    if (!ARTS_PlayerController::CurrentLocalController)
+    {
+        // Обход Очистки Указателя в режиме редактора
+        // @note    Предположительно, "обнуление" происходит из-за 'Hot Reload'
+        if (GEngine->GameViewport && GEngine->GameViewport->GetWorld())
+        {
+            UWorld* lWorld = GEngine->GameViewport->GetWorld();
+            for (FConstPlayerControllerIterator Iterator = lWorld->GetPlayerControllerIterator(); Iterator; ++Iterator)
+            {
+                APlayerController* lPlayerController = Iterator->Get();
+                if (Cast<ARTS_PlayerController>(lPlayerController))
+                {
+                    ULocalPlayer* lLocalPlayer = Cast<ULocalPlayer>(lPlayerController->Player);
+                    if (lLocalPlayer)
+                    {
+                        return ARTS_PlayerController::CurrentLocalController = (ARTS_PlayerController*)lPlayerController;
+                    }
+                }
+            }
+        }
+    }
+
+#endif // WITH_EDITOR
+
+    // В режиме "Play In Editor" данный 'static'-указатель очищается, даже если будет реализован через умные указатели.
+    // Однако стабильно работает в готовой сборке
     return ARTS_PlayerController::CurrentLocalController;
 };
 //--------------------------------------------------------------------------------------

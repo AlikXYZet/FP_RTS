@@ -141,6 +141,20 @@ private:
 /** Получить текущий экземпляр класса 'ARTS_GameState' */
 FORCEINLINE static ARTS_GameStateBase* const GetRTSGameState()
 {
+#if WITH_EDITOR
+
+    if (!ARTS_GameStateBase::CurrentGameState)
+    {
+        // Обход Очистки Указателя в режиме редактора
+        // @note    Предположительно, "обнуление" происходит из-за 'Hot Reload'
+        if (GEngine->GameViewport && GEngine->GameViewport->GetWorld())
+            ARTS_GameStateBase::CurrentGameState = GEngine->GameViewport->GetWorld()->GetGameState<ARTS_GameStateBase>();
+    }
+
+#endif // WITH_EDITOR
+
+    // В режиме "Play In Editor" данный 'static'-указатель очищается, даже если будет реализован через умные указатели.
+    // Однако стабильно работает в готовой сборке
     return ARTS_GameStateBase::CurrentGameState;
 };
 //--------------------------------------------------------------------------------------

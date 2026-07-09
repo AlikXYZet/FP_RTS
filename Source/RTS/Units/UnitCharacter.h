@@ -15,6 +15,7 @@
 #include "RTS/Tools/Interfaces/Properties/SelectableActorInterface.h"
 
 // Structs:
+#include "RTS/Tools/Structs/Properties/FractionData.h"
 #include "RTS/Tools/Structs/Properties/UnitCharacterData.h"
 
 // GAS:
@@ -230,6 +231,16 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
         Category = "Unit Data")
     FUnitCharacterData UnitCharacterData;
+    //-------------------------------------------
+
+
+
+    /* ---   Statistics   --- */
+
+    /** Получить данные о Фракци */
+    UFUNCTION(BlueprintPure,
+        Category = "Statistics")
+    const FFractionData& GetFractionData() const;
     //-------------------------------------------
 
 

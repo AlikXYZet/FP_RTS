@@ -3,7 +3,7 @@
 // Base:
 #include "RTS_AbilitySystemComponent.h"
 
-// Macros:
+// Global:
 #include "RTS/Tools/Global/GlobalMacros.h"
 //--------------------------------------------------------------------------------------
 

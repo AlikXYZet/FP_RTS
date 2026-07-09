@@ -16,8 +16,8 @@
 UENUM()
 enum struct EIsValid : uint8
 {
-    IsValid,
-    IsNOT_Valid,
+    IsValid = 1,
+    IsNOT_Valid = 0,
 };
 //-------------------------------------------
 
@@ -68,8 +68,7 @@ class RTS_API UBlueprintGlobalFunctions : public UBlueprintFunctionLibrary
     @return Сконвертируемый Объект */
     UFUNCTION(BlueprintPure,
         Category = "Utilities|Object",
-        meta = (DisplayName = "Convert Object to Class", ReturnDisplayName = "Out Object",
-            ObjectClass = "Actor", DeterminesOutputType = "ObjectClass"))
+        meta = (ObjectClass = "Actor", ReturnDisplayName = "Out Object", DeterminesOutputType = "ObjectClass"))
     static UObject* ConvertObjectToClass(
         UPARAM(ref) UObject* InObject,
         TSubclassOf<UObject> ObjectClass);
@@ -87,8 +86,8 @@ class RTS_API UBlueprintGlobalFunctions : public UBlueprintFunctionLibrary
     @return Сконвертируемый Объект */
     UFUNCTION(BlueprintCallable,
         Category = "Utilities|Object",
-        meta = (DisplayName = "Convert Valid Object to Class", ReturnDisplayName = "Out Object", ExpandEnumAsExecs = "Validity",
-            ObjectClass = "Actor", DeterminesOutputType = "ObjectClass"))
+        meta = (ObjectClass = "Actor", ExpandEnumAsExecs = "Validity",
+            ReturnDisplayName = "Out Object", DeterminesOutputType = "ObjectClass"))
     static UObject* ConvertValidObjectToClass(
         UPARAM(ref) UObject* InObject,
         TSubclassOf<UObject> ObjectClass,

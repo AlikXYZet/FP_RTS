@@ -3,7 +3,7 @@
 // Base:
 #include "AttributedActor.h"
 
-// Macros:
+// Global:
 #include "RTS/Tools/Global/GlobalMacros.h"
 
 // GAS:

@@ -8,8 +8,12 @@
 // Base:
 #include "GameFramework/GameModeBase.h"
 
-// Macros:
+// Global:
 #include "RTS/Tools/Global/GlobalMacros.h"
+
+// Structs:
+#include "GenericTeamAgentInterface.h"
+#include "RTS/Tools/Structs/Properties/FractionData.h"
 
 // Generated:
 #include "RTS_GameMode.generated.h"
@@ -21,6 +25,20 @@
 
 // Static Functions:
 static ARTS_GameModeBase* const GetRTSGameMode();
+
+// Interaction:
+class AUnitCharacter;
+//--------------------------------------------------------------------------------------
+
+
+
+/* ---   Delegates   --- */
+
+// Делегат: При изменении Количества членов Фракции
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnChangingFactionUnitsNumber, uint8, TeamID, const FFractionData&, FractionData);
+
+// Делегат: При уничтожении Фракции
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFactionDestruction, uint8, TeamID, const FFractionData&, FractionData);
 //--------------------------------------------------------------------------------------
 
 
@@ -31,6 +49,19 @@ class RTS_API ARTS_GameModeBase : public AGameModeBase
     GENERATED_BODY()
 
 public:
+
+    /* ---   Delegates   --- */
+
+    // Делегат: При изменении Количества членов Фракции
+    UPROPERTY(BlueprintAssignable)
+    FOnChangingFactionUnitsNumber OnChangingFactionUnitsNumber;
+
+    // Делегат: При уничтожении Фракции
+    UPROPERTY(BlueprintAssignable)
+    FOnFactionDestruction OnFactionDestruction;
+    //-------------------------------------------
+
+
 
     /* ---   Statics   --- */
 
@@ -108,6 +139,48 @@ public:
 
 
 
+    /* ---   Statistics   --- */
+
+    /* Таблица Данных: Данные Фракций */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite,
+        Category = "Statistics",
+        meta = (RequiredAssetDataTags = "RowStructure=FractionData"))
+    UDataTable* FactionsData = nullptr;
+
+    //
+
+    /** Регистрация Юнита */
+    void UnitRegistration(AUnitCharacter* Unit);
+
+    /** Регистрация уничтожения Юнита */
+    bool RegisteringUnitDestruction(const AUnitCharacter* Unit);
+
+    /** Получить данные о всех Фракциях */
+    UFUNCTION(BlueprintPure,
+        Category = "Statistics")
+    const TArray<FFractionData>& GetAllFractions() const
+    {
+        return AllFractions;
+    };
+
+    /** Получить данные о Фракци */
+    UFUNCTION(BlueprintPure,
+        Category = "Statistics")
+    const FFractionData& GetFractionData(const AUnitCharacter* Unit) const;
+
+    /** Получить данные о Фракци */
+    UFUNCTION(BlueprintPure,
+        Category = "Statistics")
+    const FFractionData& GetFractionDataByID(uint8 TeamID) const;
+
+    /** Получить Колличество чужих Юнитов для Фракции (все, кроме выбранной) */
+    UFUNCTION(BlueprintPure,
+        Category = "Statistics")
+    const int64 GetNumberOfOtherUnits(uint8 IgnoredTeam);
+    //-------------------------------------------
+
+
+
 private:
 
     /* ---   Statics   --- */
@@ -120,6 +193,19 @@ private:
     {
         return GetRTSGameMode();
     };
+    //-------------------------------------------
+
+
+
+    /* ---   Statistics   --- */
+
+    // Все Юниты Фракций
+    TArray<FFractionData> AllFractions;
+
+    //
+
+    /** Инициализация системы Статистики */
+    void InitStatistics();
     //-------------------------------------------
 
 
@@ -138,6 +224,20 @@ private:
 /** Получить текущий экземпляр класса 'ARTS_GameModeBase' */
 FORCEINLINE static ARTS_GameModeBase* const GetRTSGameMode()
 {
+#if WITH_EDITOR
+
+    if (!ARTS_GameModeBase::CurrentGameMode)
+    {
+        // Обход Очистки Указателя в режиме редактора
+        // @note    Предположительно, "обнуление" происходит из-за 'Hot Reload'
+        if (GEngine->GameViewport && GEngine->GameViewport->GetWorld())
+            ARTS_GameModeBase::CurrentGameMode = GEngine->GameViewport->GetWorld()->GetAuthGameMode<ARTS_GameModeBase>();
+    }
+
+#endif // WITH_EDITOR
+
+    // В режиме "Play In Editor" данный 'static'-указатель очищается, даже если будет реализован через умные указатели.
+    // Однако стабильно работает в готовой сборке
     return ARTS_GameModeBase::CurrentGameMode;
 };
 //--------------------------------------------------------------------------------------

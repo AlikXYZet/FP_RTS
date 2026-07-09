@@ -3,7 +3,7 @@
 // Base:
 #include "Projectile.h"
 
-// Macros:
+// Global:
 #include "RTS/Tools/Global/GlobalMacros.h"
 
 // UE:

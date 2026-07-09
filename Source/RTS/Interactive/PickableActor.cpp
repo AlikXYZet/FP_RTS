@@ -3,7 +3,7 @@
 // Base:
 #include "PickableActor.h"
 
-// Macros:
+// Global:
 #include "RTS/Tools/Global/GlobalMacros.h"
 
 // Interaction:

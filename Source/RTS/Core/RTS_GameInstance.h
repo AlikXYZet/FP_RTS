@@ -8,7 +8,7 @@
 // Base:
 #include "Engine/GameInstance.h"
 
-// Macros:
+// Global:
 #include "RTS/Tools/Global/GlobalMacros.h"
 
 // Generated:
@@ -139,6 +139,20 @@ private:
 /** Получить текущий экземпляр класса 'URTS_GameInstance' */
 FORCEINLINE static URTS_GameInstance* const GetRTSGameInstance()
 {
+#if WITH_EDITOR
+
+    if (!URTS_GameInstance::CurrentGameInstance)
+    {
+        // Обход Очистки Указателя в режиме редактора
+        // @note    Предположительно, "обнуление" происходит из-за 'Hot Reload'
+        if (GEngine->GameViewport && GEngine->GameViewport->GetWorld())
+            URTS_GameInstance::CurrentGameInstance = GEngine->GameViewport->GetWorld()->GetGameInstance<URTS_GameInstance>();
+    }
+
+#endif // WITH_EDITOR
+
+    // В режиме "Play In Editor" данный 'static'-указатель очищается, даже если будет реализован через умные указатели.
+    // Однако стабильно работает в готовой сборке
     return URTS_GameInstance::CurrentGameInstance;
 };
 //--------------------------------------------------------------------------------------

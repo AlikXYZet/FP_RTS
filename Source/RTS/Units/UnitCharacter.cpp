@@ -3,7 +3,7 @@
 // Base:
 #include "UnitCharacter.h"
 
-// Macros:
+// Global:
 #include "RTS/Tools/Global/GlobalFunctions.h"
 #include "RTS/Tools/Global/GlobalMacros.h"
 
@@ -18,6 +18,7 @@
 
 // Interaction:
 #include "RTS/ActorComponents/Properties/InteractiveComponent.h"
+#include "RTS/Core/RTS_GameMode.h"
 #include "RTS/Core/RTS_PlayerController.h"
 //--------------------------------------------------------------------------------------
 
@@ -88,6 +89,11 @@ void AUnitCharacter::BeginPlay()
     Super::BeginPlay();
 
     InitAbilitySystemComp();
+
+    if (GetRTSGameMode())
+    {
+        GetRTSGameMode()->UnitRegistration(this);
+    }
 }
 
 //void AUnitCharacter::Tick(float DeltaTime)
@@ -198,6 +204,11 @@ void AUnitCharacter::OnZeroHealth()
         GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     }
 
+    if (GetRTSGameMode())
+    {
+        GetRTSGameMode()->RegisteringUnitDestruction(this);
+    }
+
     Event_OnZeroHealth();
 
     SetLifeSpan(10.f);
@@ -220,5 +231,20 @@ void AUnitCharacter::SetSelectedByPlayer_Implementation(bool bIsSelected)
 bool AUnitCharacter::IsSelectedByPlayer_Implementation() const
 {
     return Decal ? !Decal->bHiddenInGame : false;
+}
+//--------------------------------------------------------------------------------------
+
+
+
+/* ---   Statistics   --- */
+
+const FFractionData& AUnitCharacter::GetFractionData() const
+{
+    if (GetRTSGameMode())
+    {
+        return GetRTSGameMode()->GetFractionData(this);
+    }
+
+    return FFractionData::Empty;
 }
 //--------------------------------------------------------------------------------------

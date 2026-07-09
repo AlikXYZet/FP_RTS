@@ -3,7 +3,7 @@
 // Base:
 #include "RTS_Character.h"
 
-// Macros:
+// Global:
 #include "RTS/Tools/Global/GlobalMacros.h"
 
 // UE:

@@ -5,7 +5,7 @@
 
 /* Пример:
 
-// Macros:
+// Global:
 #include "RTS/Tools/Global/GlobalMacros.h"
 
 */
@@ -49,6 +49,7 @@ const TArray<TEnumAsByte<EObjectTypeQuery>> UWeaponNetworkController::ObjectType
 
 /* ---   ENums   --- */
 
+/** Операторы сравнения для Enum */
 #define ENUM_COMPARISON_OPERATORS(Enum) \
     inline constexpr bool operator  >   (Enum Lhs, Enum Rhs)    { return ((__underlying_type(Enum))Lhs  >   (__underlying_type(Enum))Rhs); } \
     inline constexpr bool operator  >=  (Enum Lhs, Enum Rhs)    { return ((__underlying_type(Enum))Lhs  >=  (__underlying_type(Enum))Rhs); } \
@@ -314,6 +315,31 @@ M_LOG_Static(Error, "lInputComponent is NOT");
 
 /** Макрос: Преобразование 'bool' в указатель 'FString' для использования в макросах 'LOG' и 'Message' */
 #define BoolToString(BOOL) *FString(BOOL ? "'TRUE'" : "'FALSE'")
+//--------------------------------------------------------------------------------------
+
+
+
+/* ---   Statics   --- */
+
+/** Установить статическое Значение Структуры
+
+@param  FStruct -- Структура, что имеет своё значение в виде переменной, отмеченной как 'static'
+@param  Variable -- Переменная, требующая инициализации в файле '*.h'
+@param  Value -- Требуемое значение переменной
+
+@note   Используется, если требуется задать значение в пределах Заголовочного Файла '*.h'.
+        Например: Если НЕ создан Файл реализации '.cpp'
+*/
+#define SET_STATIC_VALUE(FStruct, Variable, Value) __declspec(selectany) const FStruct FStruct::Variable = Value;
+
+/** Установить пустое Значение Структуры для переменной 'Empty' этой же Структуры
+
+@param  FStruct -- Структура, что имеет своё значение в виде статической переменной 'Empty'
+
+@note   Используется, если требуется задать значение в пределах Заголовочного Файла '*.h'.
+        Например: Если НЕ создан Файл реализации '.cpp'
+*/
+#define SET_STATIC_EMPTY(FStruct) SET_STATIC_VALUE(FStruct, Empty, FStruct())
 //--------------------------------------------------------------------------------------
 
 

@@ -3,7 +3,7 @@
 // Base:
 #include "AIUnitController.h"
 
-// Macros:
+// Global:
 #include "RTS/Tools/Global/GlobalMacros.h"
 #include "RTS/Tools/Global/GlobalFunctions.h"
 

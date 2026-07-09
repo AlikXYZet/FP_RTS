@@ -28,8 +28,6 @@ void URTS_GameInstance::Init()
     InitSettingsSaving();
 
     Super::Init();
-
-    IsValidStaticPointer();
 }
 //--------------------------------------------------------------------------------------
 
