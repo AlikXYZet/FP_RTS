@@ -26,6 +26,20 @@
 
 // Смещение значений Атрибутов, ниже которого Атрибут воспринимается как с Нулевым значением
 #define ZERO_VALUE_OFFSET 0.5f
+
+#define GAMEPLAYSTATE_CHECKVALUE_MAX(PropertyName) \
+    if (Get##PropertyName##() < GetMax##PropertyName##() \
+        && GetMax##PropertyName##() == NewValue) \
+    { \
+        GetOwningAbilitySystemComponent()->AddLooseGameplayTag( \
+            RTS_GameplayTags::GameplayState_##PropertyName##_Max); \
+    } \
+    else if (Get##PropertyName##() == GetMax##PropertyName##() \
+        && GetMax##PropertyName##() > NewValue) \
+    { \
+        GetOwningAbilitySystemComponent()->RemoveLooseGameplayTag( \
+            RTS_GameplayTags::GameplayState_##PropertyName##_Max, 3); \
+    };
 //--------------------------------------------------------------------------------------
 
 
@@ -59,16 +73,6 @@ bool URTS_AttributeSet::PreGameplayEffectExecute(FGameplayEffectModCallbackData&
 void URTS_AttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
     Super::PostGameplayEffectExecute(Data);
-
-    if (bIsZeroHealth)
-    {
-        //if (GetRTSGameMode())
-        //{
-        //    GetRTSGameMode()->***;
-        //}
-
-        bIsZeroHealth = false;
-    }
 
     // Передача информации о уроне
     if (Data.EvaluatedData.Magnitude < 0)
@@ -114,7 +118,7 @@ void URTS_AttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, 
             && ZERO_VALUE_OFFSET > NewValue)
         {
             GetOwningAbilitySystemComponent()->AddLooseGameplayTag(
-                RTS_GameplayTags::GameplayState_WithoutArmor);
+                RTS_GameplayTags::GameplayState_Armor_Zero);
 
             OnZeroArmor.Broadcast();
         }
@@ -122,9 +126,11 @@ void URTS_AttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, 
             && ZERO_VALUE_OFFSET <= NewValue)
         {
             GetOwningAbilitySystemComponent()->RemoveLooseGameplayTag(
-                RTS_GameplayTags::GameplayState_WithoutArmor,
+                RTS_GameplayTags::GameplayState_Armor_Zero,
                 3 /* Защита от многократного тега */);
         }
+
+        GAMEPLAYSTATE_CHECKVALUE_MAX(Armor);
     }
     else if (Attribute == GetHealthAttribute())
     {
@@ -132,12 +138,12 @@ void URTS_AttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, 
             && ZERO_VALUE_OFFSET > NewValue)
         {
             GetOwningAbilitySystemComponent()->AddLooseGameplayTag(
-                RTS_GameplayTags::GameplayState_OnDestroyed);
+                RTS_GameplayTags::GameplayState_Health_Zero);
 
             OnZeroHealth.Broadcast();
-
-            bIsZeroHealth = true;
         }
+
+        GAMEPLAYSTATE_CHECKVALUE_MAX(Health);
     }
 
     Super::PreAttributeChange(Attribute, NewValue);
@@ -156,12 +162,12 @@ void URTS_AttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Attribu
         if (Attribute == GetArmorAttribute())
         {
             GetOwningAbilitySystemComponent()->AddLooseGameplayTag(
-                RTS_GameplayTags::GameplayState_WithoutArmor);
+                RTS_GameplayTags::GameplayState_Armor_Zero);
         }
         else if (Attribute == GetHealthAttribute())
         {
             GetOwningAbilitySystemComponent()->AddLooseGameplayTag(
-                RTS_GameplayTags::GameplayState_OnDestroyed);
+                RTS_GameplayTags::GameplayState_Health_Zero);
         }
     }
     else
@@ -169,11 +175,21 @@ void URTS_AttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Attribu
         // Ограничение по верхнему диапазону с проверкой в порядке от более часто изменяемого к редкому
         if (Attribute == GetArmorAttribute())
         {
-            NewValue = FMath::Min(NewValue, GetMaxArmor());
+            if (NewValue >= GetMaxArmor())
+            {
+                NewValue = GetMaxArmor();
+                GetOwningAbilitySystemComponent()->AddLooseGameplayTag(
+                    RTS_GameplayTags::GameplayState_Armor_Max);
+            }
         }
         else if (Attribute == GetHealthAttribute())
         {
-            NewValue = FMath::Min(NewValue, GetMaxHealth());
+            if (NewValue >= GetMaxHealth())
+            {
+                NewValue = GetMaxHealth();
+                GetOwningAbilitySystemComponent()->AddLooseGameplayTag(
+                    RTS_GameplayTags::GameplayState_Health_Max);
+            }
         }
     }
 

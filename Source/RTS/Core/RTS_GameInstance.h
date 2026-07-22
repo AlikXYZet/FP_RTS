@@ -56,11 +56,11 @@ public:
     };
 
     /** Метод проверки валидности статического указателя 'Current Game Instance' */
-    UFUNCTION(BlueprintCallable,
+    UFUNCTION(BlueprintCallable, BlueprintPure = false,
         Category = "RTS Game",
         meta = (DisplayName = "Is Valid Static Pointer", ExpandBoolAsExecs = "ReturnValue",
             DefaultToSelf))
-    bool BP_IsValidStaticPointer()
+    bool BP_IsValidStaticPointer() const
     {
         return IsValidStaticPointer();
     };

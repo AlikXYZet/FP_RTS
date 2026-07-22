@@ -5,21 +5,15 @@
 // Core:
 #include "Kismet/BlueprintFunctionLibrary.h"
 
+// Global:
+#include "GlobalMacros.h"
+
+// Enums:
+#include "RTS/Tools/Enums/IsValid.h"
+
 // Generated:
 #include "BlueprintGlobalFunctions.generated.h"
 //--------------------------------------------------------------------------------------
-
-
-
-/* ---   Enum   --- */
-
-UENUM()
-enum struct EIsValid : uint8
-{
-    IsValid = 1,
-    IsNOT_Valid = 0,
-};
-//-------------------------------------------
 
 
 
@@ -42,14 +36,14 @@ class RTS_API UBlueprintGlobalFunctions : public UBlueprintFunctionLibrary
     };
 
     /** Creates a literal FName from FText
-    @param  Value -- Value to set the FText to
+    @param  In -- Value to set the FText to
     @return The literal FName */
     UFUNCTION(BlueprintPure,
         Category = "Utilities|Name",
-        meta = (BlueprintThreadSafe))
-    static FName MakeLiteralNameFromText(FText Value)
+        meta = (BlueprintThreadSafe, ReturnDisplayName = "Out"))
+    static FName MakeLiteralNameFromText(FText In)
     {
-        return FName(Value.ToString());
+        return FName(In.ToString());
     };
     //-------------------------------------------
 
@@ -63,18 +57,45 @@ class RTS_API UBlueprintGlobalFunctions : public UBlueprintFunctionLibrary
     В противном случае, может вызвать Ошибки использования памяти.
 
     @param  InObject -- Объект, требующий конвертации
+
+    @return Сконвертируемый Объект */
+    UFUNCTION(BlueprintPure,
+        Category = "Utilities|Object",
+        meta = (ReturnDisplayName = "Out Object", CustomStructureParam = "ReturnValue"))
+    static UObject* ConvertObjectToClass(
+        UPARAM(ref) UObject* InObject)
+    {
+        return InObject;
+    }
+
+    /** Конвертация (преобразование) Объекта в требуемый явно выбранный Класс
+
+    @note   Используется как замена 'Cast' и Интерфейса при явно известном Классе Объекта и при уверенности его Валидности.
+    В противном случае, может вызвать Ошибки использования памяти.
+
+    @param  InObject -- Объект, требующий конвертации
     @param  ObjectClass -- Класс конвертации
 
     @return Сконвертируемый Объект */
     UFUNCTION(BlueprintPure,
         Category = "Utilities|Object",
         meta = (ObjectClass = "Actor", ReturnDisplayName = "Out Object", DeterminesOutputType = "ObjectClass"))
-    static UObject* ConvertObjectToClass(
+    static UObject* ConvertObjectToSelectedClass(
         UPARAM(ref) UObject* InObject,
-        TSubclassOf<UObject> ObjectClass);
+        TSubclassOf<UObject> ObjectClass)
+    {
+#if WITH_EDITOR
+        // Отслеживание ошибок в режиме Редактора:
+        if (InObject && !InObject->IsA(ObjectClass))
+        {
+            M_Error_Static("'%s' is NOT class '%s'. Replace this function with 'Cast'",
+                *InObject->GetName(), *ObjectClass->GetName());
+        }
+#endif // WITH_EDITOR
+        return InObject;
+    };
 
-
-    /** Конвертация (преобразование) Объекта в требуемый Класс
+    /** Конвертация (преобразование) Объекта в требуемый явно выбранный Класс с проверкой на Валидность
 
     @note   Используется как замена 'Cast' и Интерфейса при явно известном Классе.
     В противном случае, может вызвать Ошибки использования памяти.
@@ -91,10 +112,44 @@ class RTS_API UBlueprintGlobalFunctions : public UBlueprintFunctionLibrary
     static UObject* ConvertValidObjectToClass(
         UPARAM(ref) UObject* InObject,
         TSubclassOf<UObject> ObjectClass,
-        EIsValid& Validity);
+        EIsValid& Validity)
+    {
+#if WITH_EDITOR
+        // Отслеживание ошибок в режиме Редактора:
+        if (InObject && !InObject->IsA(ObjectClass))
+        {
+            M_Error_Static("'%s' is NOT class '%s'. Replace this function with 'Cast'",
+                *InObject->GetName(), *ObjectClass->GetName());
+        }
+#endif // WITH_EDITOR
+        Validity = EIsValid(IsValid(InObject));
+        return InObject;
+    };
+    //-------------------------------------------
 
+
+
+    /* ---   TArray < UObject* >   --- */
 
     /** Конвертация (преобразование) Массива Объектов в требуемый Класс
+
+    @note   Используется как замена 'Cast' и Интерфейса при явно известном Классе Объектов и при уверенности их Валидности.
+    В противном случае, может вызвать Ошибки использования памяти.
+
+    @param  InArray -- Массив, требующий конвертации
+
+    @return Сконвертируемый Массив */
+    UFUNCTION(BlueprintPure,
+        Category = "Utilities|Array",
+        meta = (ReturnDisplayName = "Out Array",
+            ArrayParm = "ReturnValue"))
+    static TArray<UObject*>& ConvertArrayToClass(
+        UPARAM(ref) TArray<UObject*>& InArray)
+    {
+        return InArray;
+    };
+
+    /** Конвертация (преобразование) Массива Объектов в требуемый явно выбранный Класс
 
     @note   Используется как замена 'Cast' и Интерфейса при явно известном Классе Объектов и при уверенности их Валидности.
     В противном случае, может вызвать Ошибки использования памяти.
@@ -104,18 +159,40 @@ class RTS_API UBlueprintGlobalFunctions : public UBlueprintFunctionLibrary
 
     @return Сконвертируемый Массив */
     UFUNCTION(BlueprintPure,
-        Category = "Utilities|Object",
-        meta = (DisplayName = "Convert Array to Class", ReturnDisplayName = "Out Array",
+        Category = "Utilities|Array",
+        meta = (ReturnDisplayName = "Out Array",
             ObjectsClass = "Actor", DeterminesOutputType = "ObjectsClass"))
-    static TArray<UObject*> ConvertArrayToClass(
-        UPARAM(ref) TArray<UObject*> InArray,
+    static TArray<UObject*>& ConvertArrayToSelectedClass(
+        UPARAM(ref) TArray<UObject*>& InArray,
         TSubclassOf<UObject> ObjectsClass)
     {
         return InArray;
     };
+    //-------------------------------------------
 
+
+
+    /* ---   TSet < UObject* >   --- */
 
     /** Конвертация (преобразование) Набора Объектов в требуемый Класс
+
+    @note   Используется как замена 'Cast' и Интерфейса при явно известном Классе Объектов и при уверенности их Валидности.
+    В противном случае, может вызвать Ошибки использования памяти.
+
+    @param  InSet -- Набор, требующий конвертации
+
+    @return Сконвертируемый Набор */
+    UFUNCTION(BlueprintPure,
+        Category = "Utilities|Set",
+        meta = (ReturnDisplayName = "Out Set",
+            SetParam = "ReturnValue"))
+    static TSet<UObject*>& ConvertSetToClass(
+        UPARAM(ref) TSet<UObject*>& InSet)
+    {
+        return InSet;
+    };
+
+    /** Конвертация (преобразование) Набора Объектов в требуемый явно выбранный Класс
 
     @note   Используется как замена 'Cast' и Интерфейса при явно известном Классе Объектов и при уверенности их Валидности.
     В противном случае, может вызвать Ошибки использования памяти.
@@ -125,11 +202,11 @@ class RTS_API UBlueprintGlobalFunctions : public UBlueprintFunctionLibrary
 
     @return Сконвертируемый Набор */
     UFUNCTION(BlueprintPure,
-        Category = "Utilities|Object",
-        meta = (DisplayName = "Convert Set to Class", ReturnDisplayName = "Out Set",
+        Category = "Utilities|Set",
+        meta = (ReturnDisplayName = "Out Set",
             ObjectsClass = "Actor", DeterminesOutputType = "ObjectsClass"))
-    static TSet<UObject*> ConvertSetToClass(
-        UPARAM(ref) TSet<UObject*> InSet,
+    static TSet<UObject*>& ConvertSetToSelectedClass(
+        UPARAM(ref) TSet<UObject*>& InSet,
         TSubclassOf<UObject> ObjectsClass)
     {
         return InSet;

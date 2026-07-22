@@ -20,7 +20,7 @@ RTS_API DECLARE_LOG_CATEGORY_EXTERN(LogRTS, All, All);
 
 
 
-/* ---   Collision   --- */
+/* ---   Values   --- */
 
 #define ECC_Pickables       ECC_GameTraceChannel1   // Канал трассировки "Pickables"
 #define ECC_MouseSelection  ECC_GameTraceChannel2   // Канал трассировки "Mouse Selection"
@@ -43,6 +43,8 @@ const TArray<TEnumAsByte<EObjectTypeQuery>> UWeaponNetworkController::ObjectType
     UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Vehicle),
     UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Destructible)
 } */
+
+#define STRING_None FString("NONE")
 //--------------------------------------------------------------------------------------
 
 
@@ -139,7 +141,7 @@ M_LOG(Error, "lNewSpeed == %s",
 M_LOG(Warning, "'%s' is NOT 'ARTS_GameState'",
     GetWorld()->GetGameState<AGameStateBase>()
     ? *GetWorld()->GetGameState<AGameStateBase>()->GetName()
-    : *FString("None"));
+    : *STRING_None);
 
 M_LOG_Static(Error, "lInputComponent is NOT");
 

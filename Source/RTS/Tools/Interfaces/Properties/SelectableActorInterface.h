@@ -8,8 +8,8 @@
 // Base:
 #include "UObject/Interface.h"
 
-// Structs:
-#include "RTS/Tools/Structs/Properties/ComponentRendering.h"
+// Enums:
+#include "RTS/Tools/Enums/ActorSelectionMode.h"
 
 // Generated:
 #include "SelectableActorInterface.generated.h"
@@ -50,20 +50,14 @@ public:
     /** Установить состояние "Выбранный" */
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable,
         Category = "Selectable Actor")
-    void SetSelectedByPlayer(bool bIsSelected);
+    void SetSelectionMode(EActorSelectionMode Mode);
 
     /** Установить состояние "Выбранный" */
-    virtual void SetSelectedByPlayer_Implementation(bool bIsSelected) = 0;
+    virtual void SetSelectionMode_Implementation(EActorSelectionMode Mode) = 0;
 
 
     /** Является ли "Выбранным"? */
-    UFUNCTION(BlueprintNativeEvent, BlueprintCallable,
-        Category = "Selectable Actor",
-        meta = (DisplayName = "Is Selected?"))
-    bool IsSelectedByPlayer() const;
-
-    /** Является ли "Выбранным"? */
-    virtual bool IsSelectedByPlayer_Implementation() const = 0;
+    virtual EActorSelectionMode GetSelectionMode() const = 0;
     //-------------------------------------------
 };
 

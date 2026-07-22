@@ -13,7 +13,7 @@
 
 // Structs:
 #include "GenericTeamAgentInterface.h"
-#include "RTS/Tools/Structs/Properties/FractionData.h"
+#include "RTS/Tools/Structs/Properties/FactionData.h"
 
 // Generated:
 #include "RTS_GameMode.generated.h"
@@ -35,10 +35,10 @@ class AUnitCharacter;
 /* ---   Delegates   --- */
 
 // Делегат: При изменении Количества членов Фракции
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnChangingFactionUnitsNumber, uint8, TeamID, const FFractionData&, FractionData);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnChangingFactionUnitsNumber, uint8, TeamID, const FFactionData&, FactionData);
 
 // Делегат: При уничтожении Фракции
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFactionDestruction, uint8, TeamID, const FFractionData&, FractionData);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFactionDestruction, uint8, TeamID, const FFactionData&, FactionData);
 //--------------------------------------------------------------------------------------
 
 
@@ -87,11 +87,11 @@ public:
     };
 
     /** Метод проверки валидности статического указателя 'Current Game Mode' */
-    UFUNCTION(BlueprintCallable,
+    UFUNCTION(BlueprintCallable, BlueprintPure = false,
         Category = "RTS Game",
         meta = (DisplayName = "Is Valid Static Pointer", ExpandBoolAsExecs = "ReturnValue",
             DefaultToSelf))
-    bool BP_IsValidStaticPointer()
+    bool BP_IsValidStaticPointer() const
     {
         return IsValidStaticPointer();
     };
@@ -142,9 +142,9 @@ public:
     /* ---   Statistics   --- */
 
     /* Таблица Данных: Данные Фракций */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite,
-        Category = "Statistics",
-        meta = (RequiredAssetDataTags = "RowStructure=FractionData"))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite,
+        Category = "RTS Game Mode|Statistics",
+        meta = (NoResetToDefault, RequiredAssetDataTags = "RowStructure=FactionData"))
     UDataTable* FactionsData = nullptr;
 
     //
@@ -157,25 +157,25 @@ public:
 
     /** Получить данные о всех Фракциях */
     UFUNCTION(BlueprintPure,
-        Category = "Statistics")
-    const TArray<FFractionData>& GetAllFractions() const
+        Category = "RTS Game Mode|Statistics")
+    const TArray<FFactionData>& GetAllFactions() const
     {
-        return AllFractions;
+        return AllFactions;
     };
 
     /** Получить данные о Фракци */
     UFUNCTION(BlueprintPure,
-        Category = "Statistics")
-    const FFractionData& GetFractionData(const AUnitCharacter* Unit) const;
+        Category = "RTS Game Mode|Statistics")
+    const FFactionData& GetFactionData(const AUnitCharacter* Unit) const;
 
     /** Получить данные о Фракци */
     UFUNCTION(BlueprintPure,
-        Category = "Statistics")
-    const FFractionData& GetFractionDataByID(uint8 TeamID) const;
+        Category = "RTS Game Mode|Statistics")
+    const FFactionData& GetFactionDataByID(uint8 TeamID) const;
 
     /** Получить Колличество чужих Юнитов для Фракции (все, кроме выбранной) */
     UFUNCTION(BlueprintPure,
-        Category = "Statistics")
+        Category = "RTS Game Mode|Statistics")
     const int64 GetNumberOfOtherUnits(uint8 IgnoredTeam);
     //-------------------------------------------
 
@@ -200,7 +200,7 @@ private:
     /* ---   Statistics   --- */
 
     // Все Юниты Фракций
-    TArray<FFractionData> AllFractions;
+    TArray<FFactionData> AllFactions;
 
     //
 

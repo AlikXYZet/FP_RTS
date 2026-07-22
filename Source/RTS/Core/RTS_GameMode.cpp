@@ -83,80 +83,80 @@ void ARTS_GameModeBase::Destroyed()
 
 void ARTS_GameModeBase::UnitRegistration(AUnitCharacter* Unit)
 {
-    if (AllFractions.Num())
+    if (AllFactions.Num())
     {
         uint8 FracID = Unit->GetGenericTeamId().GetId();
 
-        if (FracID >= AllFractions.Num())
+        if (FracID >= AllFactions.Num())
         {
-            FracID = AllFractions.Num() - 1;
+            FracID = AllFactions.Num() - 1;
         }
 
         // Увеличение Счётчика Юнитов соответствующей Фракции
-        AllFractions[FracID].Number += 1;
-        OnChangingFactionUnitsNumber.Broadcast(FracID, AllFractions[FracID]);
+        AllFactions[FracID].Number += 1;
+        OnChangingFactionUnitsNumber.Broadcast(FracID, AllFactions[FracID]);
     }
     else
     {
-        M_Error("AllFractions is EMPTY");
+        M_Error("AllFactions is EMPTY");
     }
 }
 
 bool ARTS_GameModeBase::RegisteringUnitDestruction(const AUnitCharacter* Unit)
 {
-    if (AllFractions.Num())
+    if (AllFactions.Num())
     {
         uint8 FracID = Unit->GetGenericTeamId().GetId();
 
-        if (FracID >= AllFractions.Num())
+        if (FracID >= AllFactions.Num())
         {
-            FracID = AllFractions.Num() - 1;
+            FracID = AllFactions.Num() - 1;
         }
 
         // Уменьшение Счётчика Юнитов соответствующей Фракции
-        AllFractions[FracID].Number -= 1;
-        OnChangingFactionUnitsNumber.Broadcast(FracID, AllFractions[FracID]);
+        AllFactions[FracID].Number -= 1;
+        OnChangingFactionUnitsNumber.Broadcast(FracID, AllFactions[FracID]);
 
-        if (AllFractions[FracID].Number <= 0)
+        if (AllFactions[FracID].Number <= 0)
         {
-            OnFactionDestruction.Broadcast(FracID, AllFractions[FracID]);
+            OnFactionDestruction.Broadcast(FracID, AllFactions[FracID]);
         }
 
         return true;
     }
     else
     {
-        M_Error("AllFractions is EMPTY");
+        M_Error("AllFactions is EMPTY");
     }
 
     return false;
 }
 
-const FFractionData& ARTS_GameModeBase::GetFractionData(const AUnitCharacter* Unit) const
+const FFactionData& ARTS_GameModeBase::GetFactionData(const AUnitCharacter* Unit) const
 {
     if (Unit)
     {
-        return GetFractionDataByID(Unit->GetGenericTeamId().GetId());
+        return GetFactionDataByID(Unit->GetGenericTeamId().GetId());
     }
 
-    return FFractionData::Empty;
+    return FFactionData::Empty;
 }
 
-const FFractionData& ARTS_GameModeBase::GetFractionDataByID(uint8 TeamID) const
+const FFactionData& ARTS_GameModeBase::GetFactionDataByID(uint8 TeamID) const
 {
-    if (AllFractions.Num())
+    if (AllFactions.Num())
     {
-        if (TeamID >= AllFractions.Num())
+        if (TeamID >= AllFactions.Num())
         {
-            TeamID = AllFractions.Num() - 1;
+            TeamID = AllFactions.Num() - 1;
         }
 
-        return AllFractions[TeamID];
+        return AllFactions[TeamID];
     }
     else if (FactionsData)
     {
-        TArray<FFractionData*> lAllRows;
-        FactionsData->GetAllRows<FFractionData>(__FUNCTION__, lAllRows);
+        TArray<FFactionData*> lAllRows;
+        FactionsData->GetAllRows<FFactionData>(__FUNCTION__, lAllRows);
 
         if (lAllRows.IsValidIndex(TeamID))
         {
@@ -164,27 +164,27 @@ const FFractionData& ARTS_GameModeBase::GetFractionDataByID(uint8 TeamID) const
         }
     }
 
-    return FFractionData::Empty;
+    return FFactionData::Empty;
 }
 
 const int64 ARTS_GameModeBase::GetNumberOfOtherUnits(uint8 IgnoredTeam)
 {
     int64 lCount = 0;
 
-    if (AllFractions.Num())
+    if (AllFactions.Num())
     {
-        for (FFractionData& Data : AllFractions)
+        for (FFactionData& Data : AllFactions)
         {
             lCount += Data.Number;
         }
 
-        if (AllFractions.IsValidIndex(IgnoredTeam))
+        if (AllFactions.IsValidIndex(IgnoredTeam))
         {
-            lCount -= AllFractions[IgnoredTeam].Number;
+            lCount -= AllFactions[IgnoredTeam].Number;
         }
         else
         {
-            lCount -= AllFractions.Last().Number;
+            lCount -= AllFactions.Last().Number;
         }
     }
 
@@ -196,17 +196,17 @@ FORCEINLINE void ARTS_GameModeBase::InitStatistics()
     // @note    'FORCEINLINE' действует в пределах данного '.cpp'
 
     // Получение данных о фракциях
-    TArray<FFractionData*> lAllRows;
-    FactionsData->GetAllRows<FFractionData>(__FUNCTION__, lAllRows);
+    TArray<FFactionData*> lAllRows;
+    FactionsData->GetAllRows<FFactionData>(__FUNCTION__, lAllRows);
 
     // Резервирование и заполнение памяти текущими + неучтёнными Фракциями
     // @note    ID Фракции совпадает с Номером элемента Массива
-    AllFractions.Empty(lAllRows.Num() + 1);
-    for (const FFractionData* Data : lAllRows)
+    AllFactions.Empty(lAllRows.Num() + 1);
+    for (const FFactionData* Data : lAllRows)
     {
-        AllFractions.Add(*Data);
+        AllFactions.Add(*Data);
     }
 
-    AllFractions.Add(FFractionData());
+    AllFactions.Add(FFactionData());
 }
 //--------------------------------------------------------------------------------------

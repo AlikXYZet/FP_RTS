@@ -4,7 +4,11 @@
 #include "RTS_AbilitySystemComponent.h"
 
 // Global:
+#include "RTS/Tools/Global/GlobalFunctions.h"
 #include "RTS/Tools/Global/GlobalMacros.h"
+
+// GAS:
+#include "RTS/Tools/GAS/RTS_GameplayTags.h"
 //--------------------------------------------------------------------------------------
 
 
@@ -28,23 +32,24 @@ void URTS_AbilitySystemComponent::BeginPlay()
 {
     Super::BeginPlay();
 
+    // Отложенный таймер Инициализации, дабы не перегружать момент "Begin Play"
     GetWorld()->GetTimerManager().SetTimer(
         Timer_InitStartingData,
         this,
         &URTS_AbilitySystemComponent::InitStartingData,
-        0.5f,
+        GetRandomFloat(0.8f, 0.3f),
         false);
 }
 
-void URTS_AbilitySystemComponent::OnComponentCreated()
-{
-    Super::OnComponentCreated();
-}
+//void URTS_AbilitySystemComponent::OnComponentCreated()
+//{
+//    Super::OnComponentCreated();
+//}
 
-void URTS_AbilitySystemComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
-{
-    Super::OnComponentDestroyed(bDestroyingHierarchy);
-}
+//void URTS_AbilitySystemComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
+//{
+//    Super::OnComponentDestroyed(bDestroyingHierarchy);
+//}
 //--------------------------------------------------------------------------------------
 
 
@@ -187,8 +192,13 @@ void URTS_AbilitySystemComponent::InitStartingEffectsWithParameters()
         // Фильтрация от незаполненного значения
         if (Pair.Key.Get())
         {
-            FGameplayEffectSpec lSpec = FGameplayEffectSpec(
-                Pair.Key->GetDefaultObject<UGameplayEffect>(), MakeEffectContext());
+            float* lPairValue = Pair.Value.SetByCallerValues.Find(RTS_GameplayTags::AbilityData_Basic_Level);
+            const float lLevel = lPairValue ? *lPairValue : 1.f;
+
+            FGameplayEffectSpec lSpec(
+                Pair.Key->GetDefaultObject<UGameplayEffect>(),
+                MakeEffectContext(),
+                lLevel);
 
             SetParamsInGameplayEffectSpec(lSpec, Pair.Value.SetByCallerValues);
 

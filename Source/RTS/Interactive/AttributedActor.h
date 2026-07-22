@@ -9,8 +9,8 @@
 #include "GameFramework/Actor.h"
 
 // Interfaces:
-#include "AbilitySystemInterface.h"
 #include "GenericTeamAgentInterface.h"
+#include "RTS/Tools/GAS/RTS_AbilitySystemInterface.h"
 #include "RTS/Tools/Interfaces/Properties/InteractiveInterface.h"
 #include "RTS/Tools/Interfaces/Properties/SelectableActorInterface.h"
 
@@ -39,7 +39,8 @@ class UInteractiveComponent;
 
 UCLASS()
 class RTS_API AAttributedActor : public AActor,
-    public IAbilitySystemInterface, public IInteractiveInterface, public ISelectableActorInterface, public IGenericTeamAgentInterface
+    /* UE4: */  public IGenericTeamAgentInterface,
+    /* RTS: */  public IRTS_AbilitySystemInterface, public IInteractiveInterface, public ISelectableActorInterface
 {
     GENERATED_BODY()
 
@@ -129,51 +130,6 @@ public:
 
 
 
-    /* ---   GAS Events   --- */
-
-    /** Событие BP: Изменение Здоровья */
-    UFUNCTION(BlueprintImplementableEvent,
-        Category = "Gameplay Ability System|Events",
-        meta = (DisplayName = "Changing Health"))
-    void Event_ChangingHealth(float Data);
-    GAMEPLAYATTRIBUTE_VALUE_HandleChanged(Health);
-
-    /** Событие BP: Изменение максимального Здоровья */
-    UFUNCTION(BlueprintImplementableEvent,
-        Category = "Gameplay Ability System|Events",
-        meta = (DisplayName = "Changing Max Health"))
-    void Event_ChangingMaxHealth(float Data);
-    GAMEPLAYATTRIBUTE_VALUE_HandleChanged(MaxHealth);
-
-    /** Событие BP: Изменение Брони */
-    UFUNCTION(BlueprintImplementableEvent,
-        Category = "Gameplay Ability System|Events",
-        meta = (DisplayName = "Changing Armor"))
-    void Event_ChangingArmor(float Data);
-    GAMEPLAYATTRIBUTE_VALUE_HandleChanged(Armor);
-
-    /** Событие BP: Изменение максимальной Брони */
-    UFUNCTION(BlueprintImplementableEvent,
-        Category = "Gameplay Ability System|Events",
-        meta = (DisplayName = "Changing Max Armor"))
-    void Event_ChangingMaxArmor(float Data);
-    GAMEPLAYATTRIBUTE_VALUE_HandleChanged(MaxArmor);
-
-    /** Событие BP: При Нулевом Здоровье */
-    UFUNCTION(BlueprintImplementableEvent,
-        Category = "Gameplay Ability System|Events",
-        meta = (DisplayName = "On Zero Health"))
-    void Event_OnZeroHealth();
-
-    /** Событие BP: При Нулевой Броне */
-    UFUNCTION(BlueprintImplementableEvent,
-        Category = "Gameplay Ability System|Events",
-        meta = (DisplayName = "On Zero Armor"))
-    void Event_OnZeroArmor();
-    //-------------------------------------------
-
-
-
     /* ---   Interface: Interactive   --- */
 
     /** Получить компоненты, которые требуется подсветить */
@@ -190,27 +146,29 @@ public:
     /* ---   Interface: Selectable Actor   --- */
 
     /** Установить состояние "Выбранный" */
-    virtual void SetSelectedByPlayer_Implementation(bool bIsSelected) override;
+    virtual void SetSelectionMode_Implementation(EActorSelectionMode Mode) override;
 
     /** Является ли "Выбранным"? */
-    virtual bool IsSelectedByPlayer_Implementation() const override;
+    UFUNCTION(BlueprintCallable,
+        Category = "Selectable Actor")
+    virtual EActorSelectionMode GetSelectionMode() const override;
     //-------------------------------------------
 
 
 
     /* ---   Interface: Generic Team Agent   --- */
 
-    /** Присваивает агенту команды заданный TeamID */
+    /** Присваивает Идентификатор Команды (Номер Фракции) */
     UFUNCTION(BlueprintCallable,
-        Category = "Generic Team Agent")
+        Category = "Attributed Actor|Generic Team Agent")
     virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override
     {
         TeamID = NewTeamID;
     };
 
-    /** Извлекает идентификатор команды в виде FGenericTeamId */
+    /** Извлекает Идентификатор Команды в виде FGenericTeamId */
     UFUNCTION(BlueprintCallable,
-        Category = "Generic Team Agent")
+        Category = "Attributed Actor|Generic Team Agent")
     virtual FGenericTeamId GetGenericTeamId() const override { return TeamID; }
     //-------------------------------------------
 
@@ -218,18 +176,33 @@ public:
 
 private:
 
-    /* ---   GAS   --- */
+    /* ---   Interface: GAS   --- */
 
-    /** Инициализация данных AbilitySystemComp */
-    void InitAbilitySystemComp();
+    /** Возвращает Компонент Атрибутов данного Актора */
+    FORCEINLINE URTS_AttributeSet* GetRTSAttributeSet() const override
+    {
+        return AttributeSet;
+    };
+
+    /** Инициализация данных GAS */
+    void InitAbilitySystemComp() override;
     //-------------------------------------------
 
 
 
-    /* ---   Interface: Generic Team Agent   --- */
+    /* ---   Selectable Actor   --- */
 
+    /* Текущее значение выбора игрока */
+    EActorSelectionMode CurrentSelectionMode = EActorSelectionMode::NotSelected;
+    //-------------------------------------------
+
+
+
+    /* ---   Generic Team Agent   --- */
+
+    /* Номер Фракции данного Объекта */
     UPROPERTY(EditAnywhere,
-        Category = "Generic Team Agent")
+        Category = "Attributed Actor|Generic Team Agent")
     FGenericTeamId TeamID;
     //-------------------------------------------
 };

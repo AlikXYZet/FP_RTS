@@ -72,13 +72,7 @@ public:
         Category = "Interactive|Actions")
     bool CheckActionConditions(const FKey& ButtonReleased);
 
-    virtual bool CheckActionConditions_Implementation(const FKey& ButtonReleased)
-    {
-        return true;
-        // PS:  Вызов метода 'CheckHighlightCondition' из среды 'Blueprint' на данном этапе НЕ возможен,
-        //      поэтому 'CheckActionConditions' не может дублировать его по умолчанию.
-        //      В других случаях - вызов осуществляется через 'Execute_CheckHighlightCondition(UObject* O)'
-    };
+    virtual bool CheckActionConditions_Implementation(const FKey& ButtonReleased) { return true; };
     //-------------------------------------------
 };
 

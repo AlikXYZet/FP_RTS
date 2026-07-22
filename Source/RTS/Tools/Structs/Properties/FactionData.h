@@ -12,7 +12,7 @@
 #include "Engine/DataTable.h"
 
 // Generated:
-#include "FractionData.generated.h"
+#include "FactionData.generated.h"
 //--------------------------------------------------------------------------------------
 
 
@@ -27,7 +27,7 @@
 
 /** Данные Фракции */
 USTRUCT(BlueprintType)
-struct FFractionData : public FTableRowBase
+struct FFactionData : public FTableRowBase
 {
     GENERATED_BODY()
 
@@ -35,18 +35,18 @@ struct FFractionData : public FTableRowBase
 
     /* Наименование Фракции */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
-        Category = "Fraction Data")
+        Category = "Faction Data")
     FText Name;
 
     /* Цвет Фракции */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
-        Category = "Fraction Data")
+        Category = "Faction Data")
     FLinearColor Color = FLinearColor::White;
 
     /* Количество Юнитов в Фракции на данный момент
     @note   Расчитывается на старте игры */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly,
-        Category = "Fraction Data")
+        Category = "Faction Data")
     int32 Number = 0;
     //-------------------------------------------
 
@@ -54,7 +54,7 @@ struct FFractionData : public FTableRowBase
     /* ---   Statics   --- */
 
     // Пустые Данные Фракции
-    static const FFractionData Empty;
+    static const FFactionData Empty;
     //-------------------------------------------
 };
 //--------------------------------------------------------------------------------------
@@ -64,5 +64,5 @@ struct FFractionData : public FTableRowBase
 /* ---   Statics   --- */
 
 // Пустые данные Фракции
-SET_STATIC_EMPTY(FFractionData)
+SET_STATIC_EMPTY(FFactionData)
 //--------------------------------------------------------------------------------------

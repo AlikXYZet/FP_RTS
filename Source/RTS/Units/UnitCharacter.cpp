@@ -8,6 +8,7 @@
 #include "RTS/Tools/Global/GlobalMacros.h"
 
 // GAS:
+#include "RTS/GAS/RTS_AbilitySystemComponent.h"
 #include "RTS/GAS/RTS_AttributeSet.h"
 
 // UE:
@@ -20,15 +21,6 @@
 #include "RTS/ActorComponents/Properties/InteractiveComponent.h"
 #include "RTS/Core/RTS_GameMode.h"
 #include "RTS/Core/RTS_PlayerController.h"
-//--------------------------------------------------------------------------------------
-
-
-
-/* ---   Macros   --- */
-
-/** Макрос: Подписка функции к делегату для передачи значения атрибутов GAS через Событие BP */
-#define GAMEPLAYATTRIBUTE_VALUE_Delegating_AUnitCharacter(PropertyName) \
-    GAMEPLAYATTRIBUTE_VALUE_Delegating(AUnitCharacter, PropertyName)
 //--------------------------------------------------------------------------------------
 
 
@@ -166,17 +158,17 @@ TArray<FComponentRendering> AUnitCharacter::GetUsedComponents_Implementation()
 
 void AUnitCharacter::InitAbilitySystemComp()
 {
-    if (AbilitySystemComp)
+    if (GetAbilitySystemComponent())
     {
-        if (AttributeSet)
+        if (GetRTSAttributeSet())
         {
-            GAMEPLAYATTRIBUTE_VALUE_Delegating_AUnitCharacter(Health);
-            GAMEPLAYATTRIBUTE_VALUE_Delegating_AUnitCharacter(MaxHealth);
-            GAMEPLAYATTRIBUTE_VALUE_Delegating_AUnitCharacter(Armor);
-            GAMEPLAYATTRIBUTE_VALUE_Delegating_AUnitCharacter(MaxArmor);
+            GAMEPLAYATTRIBUTE_VALUE_Delegating(Health);
+            GAMEPLAYATTRIBUTE_VALUE_Delegating(MaxHealth);
+            GAMEPLAYATTRIBUTE_VALUE_Delegating(Armor);
+            GAMEPLAYATTRIBUTE_VALUE_Delegating(MaxArmor);
 
-            AttributeSet->OnZeroHealth.AddDynamic(this, &AUnitCharacter::OnZeroHealth);
-            AttributeSet->OnZeroArmor.AddDynamic(this, &AUnitCharacter::Event_OnZeroArmor);
+            GetRTSAttributeSet()->OnZeroHealth.AddUObject(this, &AUnitCharacter::OnZeroHealth);
+            GAMEPLAYATTRIBUTE_ZERO_Delegating(OnZeroArmor);
         }
     }
     else
@@ -192,26 +184,48 @@ void AUnitCharacter::InitAbilitySystemComp()
 
 void AUnitCharacter::OnZeroHealth()
 {
-    // @note    Убираем всё лишнее
+    /* ---   Убираем всё лишнее   --- */
 
     if (GetCharacterMovement())
-    {
-        GetCharacterMovement()->DisableMovement();
-    }
+        GetCharacterMovement()->DestroyComponent();
+
+    if (Decal)
+        Decal->DestroyComponent();
+
+    if (InteractiveComponent)
+        InteractiveComponent->DestroyComponent();
+
+    if (AbilitySystemComp)
+        AbilitySystemComp->DestroyComponent();
+
+    // @note    'AttributeSet' не удаляем, так как его делегат 'OnZeroHealth' вызывает данный метод класса
+    //-------------------------------------------
+
+
+    /* ---   Изменяем параметры   --- */
 
     if (GetCapsuleComponent())
-    {
         GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+    if (GetMesh())
+    {
+        GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+        GetMesh()->SetSimulatePhysics(true);
     }
+    //-------------------------------------------
+
+
+    /* ---   Регистрируем и Информируем об уничтожении   --- */
 
     if (GetRTSGameMode())
     {
         GetRTSGameMode()->RegisteringUnitDestruction(this);
     }
 
-    Event_OnZeroHealth();
-
     SetLifeSpan(10.f);
+
+    Execute_Event_OnZeroHealth(this);
+    //-------------------------------------------
 }
 //--------------------------------------------------------------------------------------
 
@@ -219,18 +233,18 @@ void AUnitCharacter::OnZeroHealth()
 
 /* ---   Interface: Selectable Actor   --- */
 
-void AUnitCharacter::SetSelectedByPlayer_Implementation(bool bIsSelected)
+void AUnitCharacter::SetSelectionMode_Implementation(EActorSelectionMode Mode)
 {
-    if (Execute_IsSelectedByPlayer(this) != bIsSelected
-        && Decal)
+    if (Decal && GetSelectionMode() != Mode)
     {
-        Decal->SetHiddenInGame(!bIsSelected);
+        CurrentSelectionMode = Mode;
+        Decal->SetHiddenInGame(Mode == EActorSelectionMode::NotSelected);
     }
 }
 
-bool AUnitCharacter::IsSelectedByPlayer_Implementation() const
+EActorSelectionMode AUnitCharacter::GetSelectionMode() const
 {
-    return Decal ? !Decal->bHiddenInGame : false;
+    return CurrentSelectionMode;
 }
 //--------------------------------------------------------------------------------------
 
@@ -238,13 +252,28 @@ bool AUnitCharacter::IsSelectedByPlayer_Implementation() const
 
 /* ---   Statistics   --- */
 
-const FFractionData& AUnitCharacter::GetFractionData() const
+const FFactionData& AUnitCharacter::GetFactionData() const
 {
     if (GetRTSGameMode())
     {
-        return GetRTSGameMode()->GetFractionData(this);
+        return GetRTSGameMode()->GetFactionData(this);
     }
 
-    return FFractionData::Empty;
+#if WITH_EDITOR
+
+    else if (ReserveFactionsData)
+    {
+        TArray<FFactionData*> lAllRows;
+        ReserveFactionsData->GetAllRows<FFactionData>(__FUNCTION__, lAllRows);
+
+        if (lAllRows.IsValidIndex(TeamID))
+        {
+            return *lAllRows[TeamID];
+        }
+    }
+
+#endif // WITH_EDITOR
+
+    return FFactionData::Empty;
 }
 //--------------------------------------------------------------------------------------

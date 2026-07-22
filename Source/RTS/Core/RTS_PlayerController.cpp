@@ -185,14 +185,14 @@ void ARTS_PlayerController::OnScreenSelection()
     {
         if (lUnit->GetGenericTeamId() == TeamID)
         {
-            if (ISelectableActorInterface::Execute_IsSelectedByPlayer(lUnit))
+            if (lUnit->GetSelectionMode() == EActorSelectionMode::ControlledFriend)
             {
-                ISelectableActorInterface::Execute_SetSelectedByPlayer(lUnit, false);
+                ISelectableActorInterface::Execute_SetSelectionMode(lUnit, EActorSelectionMode::NotSelected);
                 SelectedAlliedUnits.Remove(lUnit);
             }
             else
             {
-                ISelectableActorInterface::Execute_SetSelectedByPlayer(lUnit, true);
+                ISelectableActorInterface::Execute_SetSelectionMode(lUnit, EActorSelectionMode::ControlledFriend);
                 SelectedAlliedUnits.Add(lUnit);
             }
 
@@ -208,21 +208,7 @@ void ARTS_PlayerController::OnScreenAction()
 {
     if (ISelectableActorInterface::CheckImplementation(HitResultForActionGroups.Actor.Get()))
     {
-        if (AUnitCharacter* lUnit = Cast<AUnitCharacter>(HitResultForActionGroups.Actor))
-        {
-            if (lUnit->GetGenericTeamId() == TeamID)
-            {
-                SetSelectedTargetActionActor(nullptr);
-            }
-            else
-            {
-                SetSelectedTargetActionActor(lUnit);
-            }
-        }
-        else
-        {
-            SetSelectedTargetActionActor(HitResultForActionGroups.Actor.Get());
-        }
+        SetSelectedTargetActionActor(HitResultForActionGroups.Actor.Get());
     }
     else
     {
@@ -290,14 +276,14 @@ void ARTS_PlayerController::ClearSelectedUnits()
     {
         if (Unit)
         {
-            ISelectableActorInterface::Execute_SetSelectedByPlayer(Unit, false);
+            ISelectableActorInterface::Execute_SetSelectionMode(Unit, EActorSelectionMode::NotSelected);
         }
     }
     SelectedAlliedUnits.Empty();
 
     if (SelectedTargetActionActor)
     {
-        ISelectableActorInterface::Execute_SetSelectedByPlayer(SelectedTargetActionActor, false);
+        ISelectableActorInterface::Execute_SetSelectionMode(SelectedTargetActionActor, EActorSelectionMode::NotSelected);
         SelectedTargetActionActor = nullptr;
     }
 }
@@ -306,14 +292,34 @@ void ARTS_PlayerController::SetSelectedTargetActionActor(AActor* TargetActor)
 {
     if (SelectedTargetActionActor)
     {
-        ISelectableActorInterface::Execute_SetSelectedByPlayer(SelectedTargetActionActor, false);
+        ISelectableActorInterface::Execute_SetSelectionMode(SelectedTargetActionActor, EActorSelectionMode::NotSelected);
     }
 
     SelectedTargetActionActor = TargetActor;
 
     if (SelectedTargetActionActor)
     {
-        ISelectableActorInterface::Execute_SetSelectedByPlayer(SelectedTargetActionActor, true);
+        if (IGenericTeamAgentInterface* lGTAI = Cast<IGenericTeamAgentInterface>(SelectedTargetActionActor))
+        {
+            if (lGTAI->GetGenericTeamId() == TeamID)
+            {
+                SelectedTargetActionMode = EActorSelectionMode::TargetFriend;
+            }
+            else if (lGTAI->GetGenericTeamId() != FGenericTeamId::NoTeam)
+            {
+                SelectedTargetActionMode = EActorSelectionMode::TargetEnemy;
+            }
+            else
+            {
+                SelectedTargetActionMode = EActorSelectionMode::TargetNeutral;
+            }
+        }
+        else
+        {
+            SelectedTargetActionMode = EActorSelectionMode::TargetNeutral;
+        }
+
+        ISelectableActorInterface::Execute_SetSelectionMode(SelectedTargetActionActor, SelectedTargetActionMode);
     }
 }
 //--------------------------------------------------------------------------------------

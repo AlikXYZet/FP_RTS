@@ -7,6 +7,7 @@
 #include "RTS/Tools/Global/GlobalMacros.h"
 
 // GAS:
+#include "RTS/GAS/RTS_AbilitySystemComponent.h"
 #include "RTS/GAS/RTS_AttributeSet.h"
 
 // UE:
@@ -15,15 +16,6 @@
 
 // Interaction:
 #include "RTS/ActorComponents/Properties/InteractiveComponent.h"
-//--------------------------------------------------------------------------------------
-
-
-
-/* ---   Macros   --- */
-
-/** Макрос: Подписка функции к делегату для передачи значения атрибутов GAS через Событие BP */
-#define GAMEPLAYATTRIBUTE_VALUE_Delegating_AAttributedActor(PropertyName) \
-    GAMEPLAYATTRIBUTE_VALUE_Delegating(AAttributedActor, PropertyName)
 //--------------------------------------------------------------------------------------
 
 
@@ -116,19 +108,19 @@ void AAttributedActor::PreInitializeComponents()
 
 void AAttributedActor::InitAbilitySystemComp()
 {
-    if (AbilitySystemComp)
+    if (GetAbilitySystemComponent())
     {
-        AbilitySystemComp->InitAbilityActorInfo(this, this);
+        GetAbilitySystemComponent()->InitAbilityActorInfo(this, this);
 
-        if (AttributeSet)
+        if (GetRTSAttributeSet())
         {
-            GAMEPLAYATTRIBUTE_VALUE_Delegating_AAttributedActor(Health);
-            GAMEPLAYATTRIBUTE_VALUE_Delegating_AAttributedActor(MaxHealth);
-            GAMEPLAYATTRIBUTE_VALUE_Delegating_AAttributedActor(Armor);
-            GAMEPLAYATTRIBUTE_VALUE_Delegating_AAttributedActor(MaxArmor);
+            GAMEPLAYATTRIBUTE_VALUE_Delegating(Health);
+            GAMEPLAYATTRIBUTE_VALUE_Delegating(MaxHealth);
+            GAMEPLAYATTRIBUTE_VALUE_Delegating(Armor);
+            GAMEPLAYATTRIBUTE_VALUE_Delegating(MaxArmor);
 
-            AttributeSet->OnZeroHealth.AddDynamic(this, &AAttributedActor::Event_OnZeroHealth);
-            AttributeSet->OnZeroArmor.AddDynamic(this, &AAttributedActor::Event_OnZeroArmor);
+            GAMEPLAYATTRIBUTE_ZERO_Delegating(OnZeroHealth);
+            GAMEPLAYATTRIBUTE_ZERO_Delegating(OnZeroArmor);
         }
     }
     else
@@ -144,7 +136,7 @@ void AAttributedActor::InitAbilitySystemComp()
 
 TArray<FComponentRendering> AAttributedActor::GetUsedComponents_Implementation()
 {
-    return TArray<FComponentRendering>{ FComponentRendering(StaticMesh, 1) };
+    return TArray<FComponentRendering>{ FComponentRendering(StaticMesh, TeamID ? 1 : 2) };
 }
 //--------------------------------------------------------------------------------------
 
@@ -157,17 +149,17 @@ TArray<FComponentRendering> AAttributedActor::GetUsedComponents_Implementation()
 
 /* ---   Interface: Selectable Actor   --- */
 
-void AAttributedActor::SetSelectedByPlayer_Implementation(bool bIsSelected)
+void AAttributedActor::SetSelectionMode_Implementation(EActorSelectionMode Mode)
 {
-    if (Execute_IsSelectedByPlayer(this) != bIsSelected
-        && Decal)
+    if (Decal && GetSelectionMode() != Mode)
     {
-        Decal->SetHiddenInGame(!bIsSelected);
+        CurrentSelectionMode = Mode;
+        Decal->SetHiddenInGame(Mode == EActorSelectionMode::NotSelected);
     }
 }
 
-bool AAttributedActor::IsSelectedByPlayer_Implementation() const
+EActorSelectionMode AAttributedActor::GetSelectionMode() const
 {
-    return Decal ? !Decal->bHiddenInGame : false;
+    return CurrentSelectionMode;
 }
 //--------------------------------------------------------------------------------------

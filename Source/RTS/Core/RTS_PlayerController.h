@@ -11,6 +11,9 @@
 // Global:
 #include "RTS/Tools/Global/GlobalMacros.h"
 
+// Enums:
+#include "RTS/Tools/Enums/ActorSelectionMode.h"
+
 // Generated:
 #include "RTS_PlayerController.generated.h"
 //--------------------------------------------------------------------------------------
@@ -59,11 +62,11 @@ public:
     };
 
     /** Метод проверки валидности статического указателя на Локальный Контроллер класса 'ARTS_PlayerController' */
-    UFUNCTION(BlueprintCallable,
+    UFUNCTION(BlueprintCallable, BlueprintPure = false,
         Category = "RTS Game",
         meta = (DisplayName = "Is Valid Static Pointer", ExpandBoolAsExecs = "ReturnValue",
             DefaultToSelf))
-    bool BP_IsValidStaticPointer()
+    bool BP_IsValidStaticPointer() const
     {
         return IsValidStaticPointer();
     };
@@ -221,7 +224,12 @@ public:
         Category = "RTS Player Controller|Selectable Actor")
     AActor* SelectedTargetActionActor = nullptr;
 
-    /* Номер Фракции данного Юнита */
+    /* Выбранный Режим целевого Действия */
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite,
+        Category = "RTS Player Controller|Selectable Actor")
+    EActorSelectionMode SelectedTargetActionMode = EActorSelectionMode::TargetNeutral;
+
+    /* Номер Фракции данного Контроллера Игрока */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
         Category = "RTS Player Controller|Selectable Actor")
     uint8 TeamID = 0;
