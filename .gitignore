@@ -7,35 +7,7 @@
 # Prerequisites
 *.d
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+### Duplicates removed ###
 
 # End of https://www.toptal.com/developers/gitignore/api/c++
 
@@ -65,6 +37,7 @@
 
 # Fortran module files
 *.mod
+*.smod
 
 # Compiled Static libraries
 *.lai
@@ -139,7 +112,7 @@ Plugins/**/Intermediate/*
 # End of https://www.toptal.com/developers/gitignore/api/unrealengine
 
 
-# IDE additionally 
+### IDE additionally ###
 *.idea*
 .vscode
 .vsconfig
@@ -148,3 +121,6 @@ Developer
 
 # Used as temporary Tool Files
 Content/Tools/
+
+# Reading '.docx' documents
+~$*
