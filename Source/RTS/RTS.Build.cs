@@ -29,7 +29,10 @@ public class RTS : ModuleRules
             "GameplayTasks",
 
             // AI Sense:
-            "AIModule"
+            "AIModule",
+
+            // Animations:
+            "AnimationBudgetAllocator",
         });
 
         if (Target.bBuildEditor)

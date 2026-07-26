@@ -47,7 +47,7 @@ public:
     /* ---   Constructors   --- */
 
     // Sets default values for this character's properties
-    AUnitCharacter();
+    AUnitCharacter(const FObjectInitializer& ObjectInitializer);
     //-------------------------------------------
 
 

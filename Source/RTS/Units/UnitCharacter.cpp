@@ -17,6 +17,9 @@
 #include "Engine/Classes/Components/DecalComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+// Plugins:
+#include "SkeletalMeshComponentBudgeted.h"
+
 // Interaction:
 #include "RTS/ActorComponents/Properties/InteractiveComponent.h"
 #include "RTS/Core/RTS_GameMode.h"
@@ -27,7 +30,8 @@
 
 /* ---   Constructors   --- */
 
-AUnitCharacter::AUnitCharacter()
+AUnitCharacter::AUnitCharacter(const FObjectInitializer& ObjectInitializer)
+    : Super(ObjectInitializer.SetDefaultSubobjectClass<USkeletalMeshComponentBudgeted>(ACharacter::MeshComponentName))
 {
     // Set this pawn to call Tick() every frame.
     // You can turn this off to improve performance if you don't need it.
