@@ -11,7 +11,8 @@
 #include "RTS/GAS/RTS_AttributeSet.h"
 
 // UE:
-#include "Engine/Classes/Components/DecalComponent.h"
+#include "Components/DecalComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 
 // Interaction:
@@ -54,6 +55,11 @@ AAttributedActor::AAttributedActor()
     Decal->SetRelativeRotation(FRotator(90.f, 0.f, 0.f));
     Decal->SetRelativeScale3D(FVector(0.3f));
     Decal->SetHiddenInGame(true);
+
+    /* Виджет отображения Атрибутов данного Актора */
+    AttributesWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Attributes Widget"));
+    AttributesWidget->SetupAttachment(RootComponent);
+    AttributesWidget->SetHiddenInGame(true);
     //-------------------------------------------
 
 

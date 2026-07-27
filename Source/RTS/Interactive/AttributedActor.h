@@ -27,6 +27,7 @@
 
 // UE:
 class UAIPerceptionStimuliSourceComponent;
+class UWidgetComponent;
 
 // Interaction | GAS:
 class URTS_AttributeSet;
@@ -67,6 +68,12 @@ public:
         Category = "Components",
         meta = (AllowPrivateAccess = "true"))
     UDecalComponent* Decal = nullptr;
+
+    /* Виджет отображения Атрибутов данного Актора */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly,
+        Category = "Components",
+        meta = (AllowPrivateAccess = "true"))
+    UWidgetComponent* AttributesWidget;
     //-------------------------------------------
 
 

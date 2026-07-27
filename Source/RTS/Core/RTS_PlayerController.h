@@ -116,14 +116,14 @@ public:
 
     /* ---   Inputs | Actions   --- */
 
-    /* Группа Действий для "Экранный Выбор" */
+    /* Группа Действий Игрока: "Экранный Выбор" */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
         Category = "RTS Player Controller|Inputs|Actions",
         meta = (GetOptions = "GetActionGroupsNames",
             DisplayName = "On-Screen Selection"))
     FName ActionGroups_OnScreenSelection = NAME_None;
 
-    /* Группа Действий для "Экранное Действие" */
+    /* Группа Действий Игрока: "Экранное Действие" */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
         Category = "RTS Player Controller|Inputs|Actions",
         meta = (GetOptions = "GetActionGroupsNames",
@@ -262,11 +262,11 @@ private:
 
     /* ---   Inputs | Actions   --- */
 
-    /** Действие при "Экранном Выборе" */
+    /** Действие при "Экранном Выборе": Выбор дружественного Юнита */
     UFUNCTION()
     void OnScreenSelection();
 
-    /** Действие при "Экранном Воздействии" */
+    /** Действие при "Экранном Воздействии": Выбор Актора для Действия на него выбранными Юнитами */
     UFUNCTION()
     void OnScreenAction();
     //-------------------------------------------

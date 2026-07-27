@@ -14,7 +14,8 @@
 // UE:
 #include "AIController.h"
 #include "Components/CapsuleComponent.h"
-#include "Engine/Classes/Components/DecalComponent.h"
+#include "Components/DecalComponent.h"
+#include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Plugins:
@@ -57,6 +58,11 @@ AUnitCharacter::AUnitCharacter(const FObjectInitializer& ObjectInitializer)
     Decal->SetRelativeRotation(FRotator(90.f, 0.f, 0.f));
     Decal->SetRelativeScale3D(FVector(0.3f));
     Decal->SetHiddenInGame(true);
+
+    /* Виджет отображения Атрибутов данного Юнита */
+    AttributesWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Attributes Widget"));
+    AttributesWidget->SetupAttachment(RootComponent);
+    AttributesWidget->SetHiddenInGame(true);
     //-------------------------------------------
 
 
@@ -199,8 +205,9 @@ void AUnitCharacter::OnZeroHealth()
     if (InteractiveComponent)
         InteractiveComponent->DestroyComponent();
 
-    if (AbilitySystemComp)
-        AbilitySystemComp->DestroyComponent();
+    // @note    'AbilitySystemComp' необходим для дальнейшего взаимодействия оставшихся Снарядов
+    //if (AbilitySystemComp)
+    //    AbilitySystemComp->DestroyComponent();
 
     // @note    'AttributeSet' не удаляем, так как его делегат 'OnZeroHealth' вызывает данный метод класса
     //-------------------------------------------

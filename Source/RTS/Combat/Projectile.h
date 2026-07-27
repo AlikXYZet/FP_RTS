@@ -109,6 +109,8 @@ public:
         meta = (ExposeOnSpawn = true))
     float StraightLineDistance = 1.f;
 
+    //
+
     /** Вызывается по истечении срока службы актера (если он у него есть). */
     virtual void LifeSpanExpired() override;
     //-------------------------------------------
