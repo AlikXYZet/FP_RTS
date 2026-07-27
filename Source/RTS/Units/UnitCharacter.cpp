@@ -202,6 +202,9 @@ void AUnitCharacter::OnZeroHealth()
     if (Decal)
         Decal->DestroyComponent();
 
+    if (AttributesWidget)
+        AttributesWidget->DestroyComponent();
+
     if (InteractiveComponent)
         InteractiveComponent->DestroyComponent();
 

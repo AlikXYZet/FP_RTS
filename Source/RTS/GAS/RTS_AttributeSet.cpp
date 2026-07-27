@@ -98,7 +98,7 @@ void URTS_AttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
                 GetWorld(),
                 lOwningActor,   // Кому урон
                 lInstigator,    // Кто нанёс урон
-                Data.EvaluatedData.Magnitude,   // Величина урона
+                -Data.EvaluatedData.Magnitude,  // Величина урона
                 lInstigator ? lInstigator->GetActorLocation() : lLocation,  // Место события
                 lLocation);     // Место попадания
             // PS: Параметр "Место события" ("Event Location") используется как
