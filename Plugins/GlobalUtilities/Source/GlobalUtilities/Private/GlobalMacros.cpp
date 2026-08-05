@@ -11,7 +11,7 @@
 
 
 
-/* ---   Init LogRTS   --- */
+/* ---   Init LogGUP   --- */
 
-DEFINE_LOG_CATEGORY(LogRTS);
+DEFINE_LOG_CATEGORY(LogGUP);
 //--------------------------------------------------------------------------------------

@@ -6,10 +6,12 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 // Global:
+#include "Enums/IsValid.h"
+#include "GlobalFunctions.h"
 #include "GlobalMacros.h"
 
-// Enums:
-#include "RTS/Tools/Enums/IsValid.h"
+// UE:
+#include "GameFramework/InputSettings.h"
 
 // Generated:
 #include "BlueprintGlobalFunctions.generated.h"
@@ -20,7 +22,7 @@
 /* ---   Blueprint Global Functions   --- */
 
 UCLASS(meta = (BlueprintThreadSafe, ScriptName = "GlobalFunctions"))
-class RTS_API UBlueprintGlobalFunctions : public UBlueprintFunctionLibrary
+class GLOBALUTILITIES_API UBlueprintGlobalFunctions : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
 
@@ -210,6 +212,29 @@ class RTS_API UBlueprintGlobalFunctions : public UBlueprintFunctionLibrary
         TSubclassOf<UObject> ObjectsClass)
     {
         return InSet;
+    };
+    //-------------------------------------------
+
+
+
+    /* ---   Inputs   --- */
+
+    /* Получить имена зарегистрированных Групп Действий */
+    UFUNCTION(BlueprintPure,
+        Category = "Utilities|Inputs",
+        meta = (DisplayName = "Get Action Groups Names", ReturnDisplayName = "Names"))
+    static TArray<FName> GetActionGroupsNames()
+    {
+        return GetActionGroups();
+    };
+
+    /* Получить имена зарегистрированных Групп Осей */
+    UFUNCTION(BlueprintPure,
+        Category = "Utilities|Inputs",
+        meta = (DisplayName = "Get Axis Groups Names", ReturnDisplayName = "Names"))
+    static TArray<FName> GetAxisGroupsNames()
+    {
+        return GetAxisGroups();
     };
     //-------------------------------------------
 };

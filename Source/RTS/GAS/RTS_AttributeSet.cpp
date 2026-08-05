@@ -4,7 +4,7 @@
 #include "RTS_AttributeSet.h"
 
 // Global:
-#include "RTS/Tools/Global/GlobalMacros.h"
+#include "GlobalMacros.h"
 
 // Net:
 #include "Net/UnrealNetwork.h"

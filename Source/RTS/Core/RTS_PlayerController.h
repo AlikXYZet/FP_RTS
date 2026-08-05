@@ -9,7 +9,7 @@
 #include "GameFramework/PlayerController.h"
 
 // Global:
-#include "RTS/Tools/Global/GlobalMacros.h"
+#include "GlobalMacros.h"
 
 // Enums:
 #include "RTS/Tools/Enums/ActorSelectionMode.h"
@@ -119,14 +119,14 @@ public:
     /* Группа Действий Игрока: "Экранный Выбор" */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
         Category = "RTS Player Controller|Inputs|Actions",
-        meta = (GetOptions = "GetActionGroupsNames",
+        meta = (GetOptions = "GlobalUtilities.BlueprintGlobalFunctions.GetActionGroupsNames",
             DisplayName = "On-Screen Selection"))
     FName ActionGroups_OnScreenSelection = NAME_None;
 
     /* Группа Действий Игрока: "Экранное Действие" */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
         Category = "RTS Player Controller|Inputs|Actions",
-        meta = (GetOptions = "GetActionGroupsNames",
+        meta = (GetOptions = "GlobalUtilities.BlueprintGlobalFunctions.GetActionGroupsNames",
             DisplayName = "On-Screen Action"))
     FName ActionGroups_OnScreenAction = NAME_None;
 
@@ -134,7 +134,7 @@ public:
     @note   Заполняет парамметр 'Click Event Keys' клавишами из данных Групп */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
         Category = "RTS Player Controller|Inputs|Actions",
-        meta = (GetOptions = "GetActionGroupsNames",
+        meta = (GetOptions = "GlobalUtilities.BlueprintGlobalFunctions.GetActionGroupsNames",
             DisplayName = "Other Screen Interactions"))
     TArray<FName> ActionGroups_OtherScreenInteractions;
 
@@ -172,7 +172,7 @@ public:
     void SetMouseToCenter();
 
     /** Получить текущее Окно просмотра Пользователя */
-    FViewport* GetCurrentViewport() const { return CurrentViewport; }
+    FORCEINLINE FViewport* GetCurrentViewport() const { return CurrentViewport; }
 
     /** Получить текущий размер Окна */
     UFUNCTION(BlueprintCallable,
@@ -315,16 +315,12 @@ public:
 
 
 
-public:
+private:
 
-    /* ---   Inputs | Actions   --- */
+    /* ---   Inputs   --- */
 
     /* Предварительная инициализация Клавиш, используемых для взаимодействия (нажатие клавиши в момент наведения мышью) */
     void UpdateClickEventKeys();
-
-    /* Получить имена всех Функций-Предикатов Актора-Владельца */
-    UFUNCTION()
-    TArray<FName> GetActionGroupsNames();
     //-------------------------------------------
 #endif
     //===========================================

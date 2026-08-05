@@ -1,0 +1,24 @@
+{
+    "FileVersion": 3,
+    "Version": 1,
+    "VersionName": "0.1",
+    "FriendlyName": "Global Utilities Plugin",
+    "Description": "Свой плагин Глобальных утилит (функции, макросы) для помощи в проектах",
+    "Category": "Utility",
+    "CreatedBy": "Alik_XYZet",
+    "CreatedByURL": "",
+    "DocsURL": "",
+    "MarketplaceURL": "",
+    "SupportURL": "",
+    "CanContainContent": false,
+    "IsBetaVersion": true,
+    "IsExperimentalVersion": true,
+    "Installed": false,
+    "Modules": [
+        {
+            "Name": "GlobalUtilities",
+            "Type": "Runtime",
+            "LoadingPhase": "Default"
+        }
+    ]
+}

@@ -142,7 +142,7 @@ private:
     /** Выбранные группы Действий */
     UPROPERTY(EditDefaultsOnly,
         Category = "Interactive|Actions",
-        meta = (GetOptions = "GetActionGroupsNames"))
+        meta = (GetOptions = "GlobalUtilities.BlueprintGlobalFunctions.GetActionGroupsNames"))
     FName SelectedActionGroups = NAME_None;
     //-------------------------------------------
 
@@ -169,12 +169,8 @@ private:
 
     /* ---   Actions   --- */
 
-    /* Получить имена всех Функций-Предикатов Актора-Владельца */
-    UFUNCTION()
-    TArray<FName> GetActionGroupsNames() const;
-
     /* Повторная инициализация используемых Клавиш */
-    void ReInitActionGroup();
+    void ReInitActionKeys();
     //-------------------------------------------
 
 #endif // WITH_EDITOR

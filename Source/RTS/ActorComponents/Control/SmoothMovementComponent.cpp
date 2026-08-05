@@ -4,7 +4,7 @@
 #include "SmoothMovementComponent.h"
 
 // Global:
-#include "RTS/Tools/Global/GlobalMacros.h"
+#include "GlobalMacros.h"
 
 // UE:
 #include "GameFramework/Actor.h"

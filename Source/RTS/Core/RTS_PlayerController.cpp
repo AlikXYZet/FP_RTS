@@ -3,6 +3,9 @@
 // Base:
 #include "RTS_PlayerController.h"
 
+// Global:
+#include "GlobalFunctions.h"
+
 // UE:
 #include "GameFramework/HUD.h"
 #include "GameFramework/InputSettings.h"
@@ -123,6 +126,23 @@ void ARTS_PlayerController::SetupInputComponent()
     //if (AxisGroups_Test != NAME_None)
     //    InputComponent->BindAxis(AxisGroups_Test, this, &ARTS_PlayerController::Test);
     //-------------------------------------------
+    //===========================================
+
+
+    /* ===   For EDITOR only   === */
+
+#if WITH_EDITOR
+
+    /* ---   Inputs   --- */
+
+    CheckActionGroups({
+        ActionGroups_OnScreenSelection,
+        ActionGroups_OnScreenAction });
+
+    CheckActionGroups(ActionGroups_OtherScreenInteractions);
+    //-------------------------------------------
+
+#endif // WITH_EDITOR
     //===========================================
 }
 
@@ -332,47 +352,51 @@ void ARTS_PlayerController::SetSelectedTargetActionActor(AActor* TargetActor)
 
 /* ---   Debugs   --- */
 
+#define CheckPropertyName(Param) \
+{ \
+    if(PropertyName == GET_MEMBER_NAME_CHECKED(ARTS_PlayerController, Param)) \
+    { \
+        CheckAxisGroups({ Param }); \
+        UpdateClickEventKeys(); \
+    } \
+}
+
 void ARTS_PlayerController::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
 
-    // Здесь можно написать логику проверки изменённого свойства.
-    FName PropertyName = (PropertyChangedEvent.Property != nullptr)
-        ? PropertyChangedEvent.Property->GetFName()
-        : NAME_None;
-
-    if (PropertyName == GET_MEMBER_NAME_CHECKED(ARTS_PlayerController, ActionGroups_OtherScreenInteractions)
-        || PropertyName == GET_MEMBER_NAME_CHECKED(ARTS_PlayerController, ActionGroups_OnScreenSelection)
-        || PropertyName == GET_MEMBER_NAME_CHECKED(ARTS_PlayerController, ActionGroups_OnScreenAction))
+    if (PropertyChangedEvent.Property)
     {
-        UpdateClickEventKeys();
+        // Здесь можно написать логику проверки изменённого свойства.
+        FName PropertyName = PropertyChangedEvent.Property->GetFName();
+
+        CheckPropertyName(ActionGroups_OtherScreenInteractions);
+        CheckPropertyName(ActionGroups_OnScreenSelection);
+        CheckPropertyName(ActionGroups_OnScreenAction);
     }
 };
 //--------------------------------------------------------------------------------------
 
 
 
-/* ---   Inputs | Actions   --- */
+/* ---   Inputs   --- */
 
 void ARTS_PlayerController::UpdateClickEventKeys()
 {
-    ClickEventKeys.Empty();
-
-    UInputSettings* InputSettings = UInputSettings::GetInputSettings();
-    TArray<FInputActionKeyMapping> lArray;
-
-    if (ActionGroups_OnScreenSelection != NAME_None)
+    if (UInputSettings* InputSettings = UInputSettings::GetInputSettings())
     {
-        InputSettings->GetActionMappingByName(ActionGroups_OnScreenSelection, lArray);
-    }
+        TArray<FInputActionKeyMapping> lArray;
 
-    if (ActionGroups_OnScreenAction != NAME_None)
-    {
-        InputSettings->GetActionMappingByName(ActionGroups_OnScreenAction, lArray);
-    }
+        if (ActionGroups_OnScreenSelection != NAME_None)
+        {
+            InputSettings->GetActionMappingByName(ActionGroups_OnScreenSelection, lArray);
+        }
 
-    if (ActionGroups_OtherScreenInteractions.Num())
-    {
+        if (ActionGroups_OnScreenAction != NAME_None)
+        {
+            InputSettings->GetActionMappingByName(ActionGroups_OnScreenAction, lArray);
+        }
+
         for (FName& NameGroup : ActionGroups_OtherScreenInteractions)
         {
             if (NameGroup != NAME_None)
@@ -380,24 +404,13 @@ void ARTS_PlayerController::UpdateClickEventKeys()
                 InputSettings->GetActionMappingByName(NameGroup, lArray);
             }
         }
+
+        ClickEventKeys.Empty();
+        for (FInputActionKeyMapping& Data : lArray)
+        {
+            ClickEventKeys.AddUnique(Data.Key);
+        }
     }
-
-    for (FInputActionKeyMapping& Data : lArray)
-    {
-        ClickEventKeys.AddUnique(Data.Key);
-    }
-}
-
-TArray<FName> ARTS_PlayerController::GetActionGroupsNames()
-{
-    UInputSettings* InputSettings = UInputSettings::GetInputSettings();
-
-    TArray<FName> ActionNames;
-
-    InputSettings->GetActionNames(ActionNames);
-    ActionNames.Add(NAME_None);
-
-    return ActionNames;
 }
 //--------------------------------------------------------------------------------------
 #endif

@@ -4,8 +4,8 @@
 #include "AIUnitController.h"
 
 // Global:
-#include "RTS/Tools/Global/GlobalMacros.h"
-#include "RTS/Tools/Global/GlobalFunctions.h"
+#include "GlobalMacros.h"
+#include "GlobalFunctions.h"
 
 // UE:
 #include "Perception/AIPerceptionComponent.h"

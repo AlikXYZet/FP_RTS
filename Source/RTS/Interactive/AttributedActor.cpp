@@ -4,7 +4,7 @@
 #include "AttributedActor.h"
 
 // Global:
-#include "RTS/Tools/Global/GlobalMacros.h"
+#include "GlobalMacros.h"
 
 // GAS:
 #include "RTS/GAS/RTS_AbilitySystemComponent.h"

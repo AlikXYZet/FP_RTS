@@ -56,6 +56,10 @@
 		{
 			"Name": "AnimationBudgetAllocator",
 			"Enabled": true
-		}
+		},
+        {
+            "Name": "GlobalUtilities",
+            "Enabled": true
+        }
 	]
 }

@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 
 // Base:
-#include "GameFramework/Pawn.h"
+#include "GameFramework/SpectatorPawn.h"
 
 // Generated:
 #include "RTS_Character.generated.h"
@@ -18,14 +18,13 @@
 
 // UE:
 class UCameraComponent;
-class UFloatingPawnMovement;
 class USpringArmComponent;
 //--------------------------------------------------------------------------------------
 
 
 
 UCLASS()
-class RTS_API ARTS_Character : public APawn
+class RTS_API ARTS_Character : public ASpectatorPawn
 {
     GENERATED_BODY()
 
@@ -56,23 +55,12 @@ public:
 
 
 
-    /* ---   Non-scene Components   --- */
-
-    /* Компонент плавного Перемещения */
-    UPROPERTY(EditAnywhere, BlueprintReadOnly,
-        Category = "Components",
-        meta = (AllowPrivateAccess = "true"))
-    UFloatingPawnMovement* FloatingMovement = nullptr;
-    //-------------------------------------------
-
-
-
 protected:
 
     /* ---   Base   --- */
 
     // Вызывается при Запуске игры или при Спавне в уже запущенной игре
-    //virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
     //-------------------------------------------
 
 
@@ -97,12 +85,6 @@ public:
 
     /* ---   Inputs   --- */
 
-    /** Получить текущий Компонент Перемещения персонажа */
-    virtual UPawnMovementComponent* GetMovementComponent() const override
-    {
-        return (UPawnMovementComponent*)FloatingMovement;
-    }
-
     /** Вызывается для привязки к входным данным */
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     //-------------------------------------------
@@ -114,7 +96,7 @@ public:
     // Группа Действий для "Test"
     //UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
     //    Category = "RTS Character|Inputs|Actions",
-    //    meta = (GetOptions = "GetActionGroupsNames",
+    //    meta = (GetOptions = "GlobalUtilities.BlueprintGlobalFunctions.GetActionGroupsNames",
     //        DisplayName = "Test"))
     //FName ActionGroups_Test = NAME_None;
     //-------------------------------------------
@@ -123,43 +105,64 @@ public:
 
     /* ---   Inputs | Axis   --- */
 
-    // Группа Осей для "Движения Вперёд" (вперёд-назад)
+    /* Группа Осей: "Движение Вперёд" (вперёд-назад) */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
         Category = "RTS Character|Inputs|Axis",
-        meta = (GetOptions = "GetAxisGroupsNames",
+        meta = (GetOptions = "GlobalUtilities.BlueprintGlobalFunctions.GetAxisGroupsNames",
             DisplayName = "Move Forward"))
     FName AxisGroups_MoveForward = NAME_None;
 
-    // Группа Осей для "Движения Вправо" (вправо-влево)
+    /* Группа Осей: "Движение Вправо" (вправо-влево) */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
         Category = "RTS Character|Inputs|Axis",
-        meta = (GetOptions = "GetAxisGroupsNames",
+        meta = (GetOptions = "GlobalUtilities.BlueprintGlobalFunctions.GetAxisGroupsNames",
             DisplayName = "Move Right"))
     FName AxisGroups_MoveRight = NAME_None;
 
-    // Группа Осей для задания Высоты Камеры
+    /* Группа Осей: "Движение Вверх" (вверх-вниз) */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
         Category = "RTS Character|Inputs|Axis",
-        meta = (GetOptions = "GetAxisGroupsNames",
-            DisplayName = "Camera Height"))
-    FName AxisGroups_CameraHeight = NAME_None;
+        meta = (GetOptions = "GlobalUtilities.BlueprintGlobalFunctions.GetAxisGroupsNames",
+            DisplayName = "Move Up"))
+    FName AxisGroups_MoveUp = NAME_None;
+
+    /* Группа Осей: Обзора Камерой по горизонтали (вправо-влево) */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
+        Category = "RTS Character|Inputs|Axis",
+        meta = (GetOptions = "GlobalUtilities.BlueprintGlobalFunctions.GetAxisGroupsNames",
+            DisplayName = "Turn"))
+    FName AxisGroups_Turn = NAME_None;
+
+    /* Группа Осей: Обзора Камерой по вертикали (вверх-вниз) */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
+        Category = "RTS Character|Inputs|Axis",
+        meta = (GetOptions = "GlobalUtilities.BlueprintGlobalFunctions.GetAxisGroupsNames",
+            DisplayName = "Look Up"))
+    FName AxisGroups_LookUp = NAME_None;
+
+    /* Группа Осей: Задание Дальности Камеры */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
+        Category = "RTS Character|Inputs|Axis",
+        meta = (GetOptions = "GlobalUtilities.BlueprintGlobalFunctions.GetAxisGroupsNames",
+            DisplayName = "Camera Distance"))
+    FName AxisGroups_CameraDistance = NAME_None;
     //-------------------------------------------
 
 
 
     /* ---   Inputs | Movement   --- */
 
-    /* Процент зоны чувствительности для управления через наведение мыши на Края Экрана */
+    /* Процент Зоны Чувствительности для управления через наведение мыши на Края Экрана */
     UPROPERTY(EditAnywhere,
         Category = "RTS Character|Inputs|Movement",
-        meta = (ClampMin = 0, UIMin = 0, ClampMax = 0.5f, UIMax = 0.5f))
-    FVector2D SensitiveZonePercentage = FVector2D(0.2f);
+        meta = (AllowPreserveRatio, ClampMin = 0, UIMin = 0, ClampMax = 0.5f, UIMax = 0.5f))
+    FVector2D SensitiveZonePercentage = FVector2D(0.1f);
 
     /* Скорость перемещения */
     UPROPERTY(EditAnywhere,
         Category = "RTS Character|Inputs|Movement",
-        meta = (ClampMin = 1.f, UIMin = 1.f, ClampMax = 100.f, UIMax = 100.f))
-    float MovementSpeed = 20.f;
+        meta = (ClampMin = 0.001f, UIMin = 0.001f, ClampMax = 1.f, UIMax = 1.f))
+    float MovementSpeed = 0.005f;
 
     //
 
@@ -176,33 +179,47 @@ public:
 
     /* ---   Inputs | Camera   --- */
 
-    /* Диапазон Высоты Камеры */
+    /* Диапазон Дальности Камеры */
     UPROPERTY(EditAnywhere,
-        Category = "RTS Character|Inputs|Camera",
+        Category = "RTS Character|Inputs|Camera|Distance",
         meta = (DisplayName = "Range",
-            ClampMin = 10, UIMin = 10, ClampMax = 50000, UIMax = 50000))
-    FVector2D CameraHeight_Range = FVector2D(10, 5000);
+            ClampMin = 0, UIMin = 0, ClampMax = 50000, UIMax = 50000))
+    FVector2D CameraDistance_Range = FVector2D(10.f, 5000.f);
 
-    // Скорость изменения Высоты Камеры
+    /* Скорость изменения дальности Камеры */
     UPROPERTY(EditAnywhere,
-        Category = "RTS Character|Inputs|Camera",
+        Category = "RTS Character|Inputs|Camera|Distance",
         meta = (DisplayName = "Change Speed",
             ClampMin = 0.1f, UIMin = 0.1f, ClampMax = 100, UIMax = 100))
-    float CameraHeight_ChangeSpeed = 10;
+    float CameraDistance_ChangeSpeed = 5.f;
 
-    // Заданная высота камеры
+    /* Заданная дальность камеры */
     UPROPERTY(EditAnywhere,
-        Category = "RTS Character|Inputs|Camera",
+        Category = "RTS Character|Inputs|Camera|Distance",
         meta = (DisplayName = "Setpoint",
             ClampMin = 10, UIMin = 10, ClampMax = 50000, UIMax = 50000))
-    float CameraHeight_Setpoint = 2000;
+    float CameraDistance_Setpoint = 2000.f;
 
-    // Скорость изменения Задания высоты камеры
+    /* Скорость изменения Задания дальности камеры */
     UPROPERTY(EditAnywhere,
-        Category = "RTS Character|Inputs|Camera",
+        Category = "RTS Character|Inputs|Camera|Distance",
         meta = (DisplayName = "Setpoint Change Speed",
             ClampMin = 0.01f, UIMin = 0.01f, ClampMax = 1, UIMax = 1))
-    float CameraHeight_SetpointChangeSpeed = 0.1f;
+    float CameraDistance_SetpointChangeSpeed = 0.1f;
+
+    /* Скорость Поворота камеры */
+    UPROPERTY(EditAnywhere,
+        Category = "RTS Character|Inputs|Camera|Rotation",
+        meta = (DisplayName = "Turn Speed",
+            ClampMin = -10.f, UIMin = -10.f, ClampMax = 10.f, UIMax = 10.f))
+    float CameraRotation_TurnSpeed = 1.f;
+
+    /* Диапазон Обзора Камерой по вертикали (вверх-вниз) в градусах */
+    UPROPERTY(EditAnywhere,
+        Category = "RTS Character|Inputs|Camera|Rotation",
+        meta = (DisplayName = "Look Up Range",
+            ClampMin = -89, UIMin = -89, ClampMax = 89, UIMax = 89))
+    FVector2D CameraRotation_LookUpRange = FVector2D(-89.f, 10.f);
     //-------------------------------------------
 
 
@@ -219,27 +236,48 @@ private:
             а также для отслеживания контроллера соответствующего типа */
     FViewport* CurrentViewport = nullptr;
 
+    /* Текущий размера экрана (может изменяться в процессе игры) */
+    FIntPoint CurrentSize = FIntPoint::ZeroValue;
+
+    /* Расчитанная Зона Чувствительности для управления через наведение мыши на Края Экрана */
+    FVector2D SensitiveZone = FVector2D::ZeroVector;
+
     //
 
     /** Ввод передвижения: вперёд-назад */
-    void MoveForward(float Value);
+    virtual void MoveForward(float Value) override;
 
     /** Ввод передвижения: вправо-влево */
-    void MoveRight(float Value);
+    virtual void MoveRight(float Value) override;
+
+    /** Ввод передвижения: вверх-вниз */
+    virtual void MoveUp_World(float Val) override;
 
     /** Управление с помощью Краёв Экрана */
-    void ScreenEdgeControl();
+    void ScreenEdgeControl(float DeltaTime);
+
+    /** Инициализация: Управление краем экрана */
+    void InitScreenEdgeControl();
+
+    /** Событме: При изменении размера окна просмотра */
+    void OnViewportResized(FViewport* Viewport, uint32 Params);
     //-------------------------------------------
 
 
 
     /* ---   Inputs | Camera   --- */
 
+    /** Обзора Камерой по горизонтали (вправо-влево) с заданной скоростью */
+    virtual void TurnAtRate(float Rate) override;
+
+    /** Обзора Камерой по вертикали (вверх-вниз) с заданной скоростью */
+    virtual void LookUpAtRate(float Rate) override;
+
     /** Ввод перемещения Камеры */
-    void MoveCamera(float Value);
+    void CameraRange(float Value);
 
     /** Контроль Высоты Камеры */
-    void CameraHeightControl(float DeltaTime);
+    void CameraRangeControl(float DeltaTime);
     //-------------------------------------------
 
 
@@ -248,20 +286,12 @@ private:
 
 #if WITH_EDITOR
 
-private:
+public:
 
-    /* ---   Inputs   --- */
+    /* ---   Debugs   --- */
 
-    /* Получить имена зарегистрированных Групп Действий */
-    UFUNCTION()
-    TArray<FName> GetActionGroupsNames();
-
-    /* Получить имена зарегистрированных Групп Осей */
-    UFUNCTION()
-    TArray<FName> GetAxisGroupsNames();
-
-    /* Проверить группы входных данных */
-    void CheckInputsGroups();
+    /** Вызывается, когда свойство этого объекта было изменено извне */
+    virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
     //-------------------------------------------
 
 #endif // WITH_EDITOR

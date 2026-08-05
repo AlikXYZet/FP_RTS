@@ -4,7 +4,8 @@
 #include "InteractiveComponent.h"
 
 // Global:
-#include "RTS/Tools/Global/GlobalMacros.h"
+#include "GlobalFunctions.h"
+#include "GlobalMacros.h"
 
 // UE:
 #include "GameFramework/InputSettings.h"
@@ -120,7 +121,10 @@ void UInteractiveComponent::InitHighlightedComponents()
 
 void UInteractiveComponent::InitActionGroup()
 {
-    GetOwner()->OnClicked.AddDynamic(this, &UInteractiveComponent::OwnerWasClicked);
+    if (ActionKeys.Num())
+    {
+        GetOwner()->OnClicked.AddDynamic(this, &UInteractiveComponent::OwnerWasClicked);
+    }
 }
 
 void UInteractiveComponent::OwnerWasClicked(AActor* TouchedActor, FKey ButtonReleased)
@@ -149,7 +153,7 @@ void UInteractiveComponent::PostEditChangeProperty(FPropertyChangedEvent& Proper
     if (PropertyChangedEvent.Property
         && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(UInteractiveComponent, SelectedActionGroups))
     {
-        ReInitActionGroup();
+        ReInitActionKeys();
     }
 };
 
@@ -163,30 +167,29 @@ void UInteractiveComponent::PostEditChangeProperty(FPropertyChangedEvent& Proper
 
 /* ---   Actions   --- */
 
-TArray<FName> UInteractiveComponent::GetActionGroupsNames() const
+void UInteractiveComponent::ReInitActionKeys()
 {
-    TArray<FName> ActionNames;
+    CheckActionGroups({ SelectedActionGroups });
 
-    UInputSettings::GetInputSettings()->GetActionNames(ActionNames);
-    ActionNames.Add(NAME_None);
-
-    return ActionNames;
-}
-
-void UInteractiveComponent::ReInitActionGroup()
-{
     ActionKeys.Empty();
 
     if (SelectedActionGroups != NAME_None)
     {
-        UInputSettings* InputSettings = UInputSettings::GetInputSettings();
-        TArray<FInputActionKeyMapping> lArray;
-
-        InputSettings->GetActionMappingByName(SelectedActionGroups, lArray);
-
-        for (FInputActionKeyMapping& Data : lArray)
+        if (UInputSettings* InputSettings = UInputSettings::GetInputSettings())
         {
-            ActionKeys.Add(Data.Key);
+            TArray<FInputActionKeyMapping> lArray;
+
+            InputSettings->GetActionMappingByName(SelectedActionGroups, lArray);
+
+            if (lArray.Num())
+            {
+                ActionKeys.Reserve(lArray.Num());
+
+                for (FInputActionKeyMapping& Data : lArray)
+                {
+                    ActionKeys.Add(Data.Key);
+                }
+            }
         }
     }
 }

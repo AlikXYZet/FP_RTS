@@ -4,7 +4,7 @@
 #include "Projectile.h"
 
 // Global:
-#include "RTS/Tools/Global/GlobalMacros.h"
+#include "GlobalMacros.h"
 
 // UE:
 #include "Components/SphereComponent.h"

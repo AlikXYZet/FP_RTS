@@ -4,8 +4,8 @@
 #include "RTS_AbilitySystemComponent.h"
 
 // Global:
-#include "RTS/Tools/Global/GlobalFunctions.h"
-#include "RTS/Tools/Global/GlobalMacros.h"
+#include "GlobalFunctions.h"
+#include "GlobalMacros.h"
 
 // GAS:
 #include "RTS/Tools/GAS/RTS_GameplayTags.h"

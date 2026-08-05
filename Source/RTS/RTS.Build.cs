@@ -33,6 +33,9 @@ public class RTS : ModuleRules
 
             // Animations:
             "AnimationBudgetAllocator",
+
+            // Global:
+            "GlobalUtilities"
         });
 
         if (Target.bBuildEditor)

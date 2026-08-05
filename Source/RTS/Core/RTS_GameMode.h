@@ -9,7 +9,7 @@
 #include "GameFramework/GameModeBase.h"
 
 // Global:
-#include "RTS/Tools/Global/GlobalMacros.h"
+#include "GlobalMacros.h"
 
 // Structs:
 #include "GenericTeamAgentInterface.h"

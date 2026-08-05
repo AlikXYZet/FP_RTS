@@ -4,7 +4,7 @@
 #include "SmoothRotationComponent.h"
 
 // Global:
-#include "RTS/Tools/Global/GlobalMacros.h"
+#include "GlobalMacros.h"
 
 // UE:
 #include "Kismet/KismetMathLibrary.h"

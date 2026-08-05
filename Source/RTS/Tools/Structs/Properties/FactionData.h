@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 
 // Global:
-#include "RTS/Tools/Global/GlobalMacros.h"
+#include "GlobalMacros.h"
 
 // UE:
 #include "Engine/DataTable.h"

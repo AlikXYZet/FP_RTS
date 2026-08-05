@@ -6,30 +6,31 @@
 /* Пример:
 
 // Global:
-#include "RTS/Tools/Global/GlobalMacros.h"
+#include "GlobalMacros.h"
 
 */
 //--------------------------------------------------------------------------------------
 
 
 
-/* ---   Init LogRTS   --- */
+/* ---   Init LogGUP   --- */
 
-RTS_API DECLARE_LOG_CATEGORY_EXTERN(LogRTS, All, All);
+GLOBALUTILITIES_API DECLARE_LOG_CATEGORY_EXTERN(LogGUP, All, All);
 //--------------------------------------------------------------------------------------
 
 
 
 /* ---   Values   --- */
 
-#define ECC_Pickables       ECC_GameTraceChannel1   // Канал трассировки "Pickables"
-#define ECC_MouseSelection  ECC_GameTraceChannel2   // Канал трассировки "Mouse Selection"
-
+#define ECC_Pickables       ECC_GameTraceChannel1   // Канал трассировки "Pickables" ("Подбираемые предметы")
+#define ECC_MouseSelection  ECC_GameTraceChannel2   // Канал трассировки "Mouse Selection" ("Выбор Мыши")
+#define ECC_WorldZone       ECC_GameTraceChannel3   // Канал трассировки "World Zone" ("Мировая Зона", она же Граница карты)
 #define ProfileName_Destructible            TEXT("Destructible")
 #define ProfileName_InvisibleWallDynamic    TEXT("InvisibleWallDynamic")
 #define ProfileName_Trigger                 TEXT("Trigger")
 #define ProfileName_InvisibleWall           TEXT("InvisibleWall")
 #define ProfileName_Pickables               TEXT("Pickables")
+#define ProfileName_Spectator               TEXT("Spectator")
 
 // Соответствие проверено опытным путём:
 #define EOT_Pawn            EObjectTypeQuery::ObjectTypeQuery3 // [2]: for ECollisionChannel::ECC_Pawn, [2]
@@ -77,13 +78,13 @@ const TArray<TEnumAsByte<EObjectTypeQuery>> UWeaponNetworkController::ObjectType
 
 /* ---   Main LOG   --- */
 
-/** Макрос, который выводит отформатированное сообщение в журнал под категорией 'LogRTS'
+/** Макрос, который выводит отформатированное сообщение в журнал под категорией 'LogGUP'
 
 @param  Verbosity - Уровень информации (Error, Warning и др.)
 @param  Format - Формат текста */
-#define M_LOG_Empty(Verbosity, Format, ...) UE_LOG(LogRTS, Verbosity, TEXT("" Format), ##__VA_ARGS__)
+#define M_LOG_Empty(Verbosity, Format, ...) UE_LOG(LogGUP, Verbosity, TEXT("" Format), ##__VA_ARGS__)
 
-/** Макрос, который выводит отформатированное сообщение в журнал под категорией 'LogRTS'
+/** Макрос, который выводит отформатированное сообщение в журнал под категорией 'LogGUP'
     и дополнительную информацию о экземпляре класса и методе класса, где было вызвано сообщение
 
 @param  Verbosity - Уровень информации (Error, Warning и др.)
@@ -98,7 +99,7 @@ const TArray<TEnumAsByte<EObjectTypeQuery>> UWeaponNetworkController::ObjectType
         ##__VA_ARGS__); \
 }
 
-/** Макрос, который выводит отформатированное сообщение в журнал под категорией 'LogRTS'
+/** Макрос, который выводит отформатированное сообщение в журнал под категорией 'LogGUP'
     и дополнительную информацию о структуре и его методе, где было вызвано сообщение
 
 @param  Verbosity - Уровень информации (Error, Warning и др.)
@@ -113,7 +114,7 @@ const TArray<TEnumAsByte<EObjectTypeQuery>> UWeaponNetworkController::ObjectType
         ##__VA_ARGS__); \
 }
 
-/** Макрос, который выводит отформатированное сообщение в журнал под категорией 'LogRTS'
+/** Макрос, который выводит отформатированное сообщение в журнал под категорией 'LogGUP'
     и дополнительную информацию о экземплярах класса-владельца и текущего класса-компонента,
     а также о методе класса, где было вызвано сообщение
 
@@ -234,14 +235,14 @@ M_LOG_Static(Error, "lInputComponent is NOT");
 
 /* ---   Main Errors Message   --- */
 
-/** Макрос вывода сообщения в журнал под категорией 'LogRTS' и на экран (красным цветом)
+/** Макрос вывода сообщения в журнал под категорией 'LogGUP' и на экран (красным цветом)
 
 @param  Format - Формат текста */
 #define M_Error_Empty(Format, ...) \
     M_LOG_Empty(Error, Format, ##__VA_ARGS__); \
     M_Message_Empty(Format, ##__VA_ARGS__);
 
-/** Макрос вывода сообщения в журнал под категорией 'LogRTS' и на экран (красным цветом)
+/** Макрос вывода сообщения в журнал под категорией 'LogGUP' и на экран (красным цветом)
     с дополнительной информацией о экземпляре класса и методе класса, где было вызвано сообщение
 
 @param  Format - Формат текста */
@@ -253,7 +254,7 @@ M_LOG_Static(Error, "lInputComponent is NOT");
         ##__VA_ARGS__); \
 }
 
-/** Макрос вывода сообщения в журнал под категорией 'LogRTS' и на экран (красным цветом)
+/** Макрос вывода сообщения в журнал под категорией 'LogGUP' и на экран (красным цветом)
     и дополнительную информацию о структуре и его методе, где было вызвано сообщение
 
 @param  Format - Формат текста
@@ -267,7 +268,7 @@ M_LOG_Static(Error, "lInputComponent is NOT");
         ##__VA_ARGS__); \
 }
 
-/** Макрос вывода сообщения в журнал под категорией 'LogRTS' и на экран (красным цветом)
+/** Макрос вывода сообщения в журнал под категорией 'LogGUP' и на экран (красным цветом)
     с дополнительной информацией о экземплярах класса-владельца и текущего класса-компонента,
     а также о методе класса, где было вызвано сообщение
 
@@ -346,7 +347,25 @@ M_LOG_Static(Error, "lInputComponent is NOT");
 
 
 
-/* ---   Примечание   --- */
+/* ===   Does NOT work via Macros   === */
+
+/* ---   'Get Options' | Inputs   --- */
+
+/** Доступ для 'GetOptions':
+
+    - Получить Наименования групп ввода: Действия ('Action')
+    "GlobalUtilities.BlueprintGlobalFunctions.GetActionGroupsNames"
+
+    - Получить Наименования групп ввода: Оси ('Axis')
+    "GlobalUtilities.BlueprintGlobalFunctions.GetAxisGroupsNames"
+
+*/
+//--------------------------------------------------------------------------------------
+//======================================================================================
+
+
+
+/* ===   Примечание   === */
 
 /** Используемые форматы:
 @see    Engine/Source/Runtime/Core/Public/Templates/UnrealTypeTraits.h
@@ -373,4 +392,4 @@ Expose_TFormatSpecifier(unsigned long, "%lu")
 @see    Engine/Source/Runtime/Core/Public/Math/UnitConversion.h
 or      #include "Math/UnitConversion.h"
 */
-//--------------------------------------------------------------------------------------
+//======================================================================================

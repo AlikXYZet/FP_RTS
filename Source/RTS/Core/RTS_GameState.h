@@ -9,7 +9,7 @@
 #include "GameFramework/GameStateBase.h"
 
 // Global:
-#include "RTS/Tools/Global/GlobalMacros.h"
+#include "GlobalMacros.h"
 
 // Generated:
 #include "RTS_GameState.generated.h"

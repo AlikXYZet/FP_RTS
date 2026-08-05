@@ -9,7 +9,7 @@
 #include "Engine/GameInstance.h"
 
 // Global:
-#include "RTS/Tools/Global/GlobalMacros.h"
+#include "GlobalMacros.h"
 
 // Generated:
 #include "RTS_GameInstance.generated.h"

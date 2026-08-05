@@ -4,7 +4,7 @@
 #include "PickableActor.h"
 
 // Global:
-#include "RTS/Tools/Global/GlobalMacros.h"
+#include "GlobalMacros.h"
 
 // Interaction:
 #include "RTS/ActorComponents/Properties/InteractiveComponent.h"

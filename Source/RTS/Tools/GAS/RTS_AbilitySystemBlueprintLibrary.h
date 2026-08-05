@@ -6,10 +6,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 // Global:
-#include "RTS/Tools/Global/GlobalMacros.h"
-
-// Enums:
-#include "RTS/Tools/Enums/IsValid.h"
+#include "Enums/IsValid.h"
+#include "GlobalMacros.h"
 
 // Interaction:
 #include "RTS/GAS/RTS_AbilitySystemComponent.h"

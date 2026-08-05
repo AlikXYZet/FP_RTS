@@ -4,25 +4,18 @@
 #include "RTS_Character.h"
 
 // Global:
-#include "RTS/Tools/Global/GlobalMacros.h"
+#include "GlobalFunctions.h"
+#include "GlobalMacros.h"
 
 // UE:
 #include "Camera/CameraComponent.h"
-#include "GameFramework/FloatingPawnMovement.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/InputSettings.h"
+#include "GameFramework/SpectatorPawnMovement.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Kismet/KismetMathLibrary.h"
 
 // Interaction:
 #include "RTS_PlayerController.h"
-//--------------------------------------------------------------------------------------
-
-
-
-/* ---   Macros   --- */
-
-// Макрос: Расчёт Скорости Перемещения
-#define MOVSPEED_CALCULATION (CameraHeight_Setpoint + 500) * MovementSpeed * 0.00001f
 //--------------------------------------------------------------------------------------
 
 
@@ -36,20 +29,23 @@ ARTS_Character::ARTS_Character()
     PrimaryActorTick.bCanEverTick = true; // Принудительно
     //SetActorTickInterval(0.1f); // 10 раз/сек.
 
-    // Не отслеживаем пересечения коллизии
-    bGenerateOverlapEventsDuringLevelStreaming = false;
+    // Управление по умолчанию из родительского класса не подходит
+    bAddDefaultMovementBindings = false;
+
+    // Включить Управление камерой через Контроллер Игрока
+    bUseControllerRotationYaw = true;
     //-------------------------------------------
 
 
     /* ---   Components   --- */
 
-    /* Корневой компонент */
-    RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+    /* Корневой компонент: Сферическая коллизия */
+    GetCollisionComponent()->SetCollisionProfileName(ProfileName_Spectator);
 
     /* Держатель камеры */
     SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm"));
     SpringArm->SetupAttachment(RootComponent);
-    SpringArm->TargetArmLength = CameraHeight_Setpoint;
+    SpringArm->TargetArmLength = CameraDistance_Setpoint;
     SpringArm->bDoCollisionTest = false;
     SpringArm->SetRelativeRotation(FRotator(-70.f, 0.f, 0.f));
 
@@ -61,8 +57,13 @@ ARTS_Character::ARTS_Character()
 
     /* ---   Non-scene Components   --- */
 
-    /* Компонент плавного Перемещения */
-    FloatingMovement = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("Floating Movement"));
+    /* Компонент перемещения "Наблюдателя", который инициализируется в родительском классе 'ASpectatorPawn' */
+    if (USpectatorPawnMovement* lSPM = Cast<USpectatorPawnMovement>(GetMovementComponent()))
+    {
+        lSPM->MaxSpeed = 1'200'000.f;
+        lSPM->Acceleration = 40'000.f;
+        lSPM->Deceleration = 80'000.f;
+    }
     //-------------------------------------------
 }
 //--------------------------------------------------------------------------------------
@@ -71,39 +72,47 @@ ARTS_Character::ARTS_Character()
 
 /* ---   Base   --- */
 
-//void ARTS_Character::BeginPlay()
-//{
-//    Super::BeginPlay();
-//}
+void ARTS_Character::BeginPlay()
+{
+    Super::BeginPlay();
+
+    /* Учёт сетевых нюансов (использовать, при необходимости):
+    Старт инициализации для Игрока-Клиента (`Listen Server`)
+    @note   Контроллер не валиден в моемент запуска Отложенного(!) матча
+            (если есть период ожидания начала матча при использовании кода класса 'AGameMode') */
+            //if (!HasAuthority() && IsLocallyControlled())
+    {
+        InitScreenEdgeControl();
+    }
+}
 
 void ARTS_Character::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    ScreenEdgeControl();
-    CameraHeightControl(DeltaTime);
+    ScreenEdgeControl(DeltaTime);
+    CameraRangeControl(DeltaTime);
 }
 
 void ARTS_Character::PossessedBy(AController* NewController)
 {
     Super::PossessedBy(NewController);
 
-    if (Cast<ARTS_PlayerController>(NewController))
-    {
-        bScreenEdgeControl = true;
-    }
-    else
-    {
-        M_Error("'NewController' is NOT 'ARTS_PlayerController'");
-    }
+    /* Учёт сетевых нюансов (использовать, при необходимости):
+    Старт инициализации для Игрока-Сервера (`Listen Server`)
+    @note   'PossessedBy(*)' не вызывается на стороне Клиента */
+    //if (IsLocallyControlled())
+    //{
+    //    InitScreenEdgeControl();
+    //}
 }
 
 void ARTS_Character::UnPossessed()
 {
     Super::UnPossessed();
-    
+
     bScreenEdgeControl = false;
-    CurrentViewport = nullptr;
+    FViewport::ViewportResizedEvent.RemoveAll(this);
 }
 //--------------------------------------------------------------------------------------
 
@@ -111,9 +120,16 @@ void ARTS_Character::UnPossessed()
 
 /* ---   Inputs   --- */
 
+#define BindAxisGroups(AxisGroups, Function) \
+{ \
+    if (AxisGroups != NAME_None) \
+        PlayerInputComponent->BindAxis(AxisGroups, this, &ARTS_Character::Function); \
+}
+
 void ARTS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-    Super::SetupPlayerInputComponent(PlayerInputComponent);
+    //Super::SetupPlayerInputComponent(PlayerInputComponent);
+    // @note    Управление по умолчанию из родительского класса не подходит
 
 
     /* ===   Actions   === */
@@ -133,18 +149,17 @@ void ARTS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
     /* ---   Axis | Movement   --- */
 
-    if (AxisGroups_MoveForward != NAME_None)
-        PlayerInputComponent->BindAxis(AxisGroups_MoveForward, this, &ARTS_Character::MoveForward);
-
-    if (AxisGroups_MoveRight != NAME_None)
-        PlayerInputComponent->BindAxis(AxisGroups_MoveRight, this, &ARTS_Character::MoveRight);
+    BindAxisGroups(AxisGroups_MoveForward, MoveForward);
+    BindAxisGroups(AxisGroups_MoveRight, MoveRight);
+    BindAxisGroups(AxisGroups_MoveUp, MoveUp_World);
     //-------------------------------------------
 
 
     /* ---   Inputs | Camera   --- */
 
-    if (AxisGroups_CameraHeight != NAME_None)
-        PlayerInputComponent->BindAxis(AxisGroups_CameraHeight, this, &ARTS_Character::MoveCamera);
+    BindAxisGroups(AxisGroups_Turn, TurnAtRate);
+    BindAxisGroups(AxisGroups_LookUp, LookUpAtRate);
+    BindAxisGroups(AxisGroups_CameraDistance, CameraRange);
     //-------------------------------------------
     //===========================================
 
@@ -155,7 +170,13 @@ void ARTS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
     /* ---   Inputs   --- */
 
-    CheckInputsGroups();
+    CheckAxisGroups({
+        AxisGroups_MoveForward,
+        AxisGroups_MoveRight,
+        AxisGroups_MoveUp,
+        AxisGroups_Turn,
+        AxisGroups_LookUp,
+        AxisGroups_CameraDistance });
     //-------------------------------------------
 
 #endif // WITH_EDITOR
@@ -166,6 +187,9 @@ void ARTS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 
 /* ---   Inputs | Movement   --- */
+
+/* Макрос: Расчёт Скорости Перемещения */
+#define MOVSPEED_CALCULATION (CameraDistance_Setpoint + 500) * MovementSpeed * 0.0167f
 
 void ARTS_Character::MoveForward(float Value)
 {
@@ -183,60 +207,90 @@ void ARTS_Character::MoveRight(float Value)
     }
 }
 
-FORCEINLINE void ARTS_Character::ScreenEdgeControl()
+void ARTS_Character::MoveUp_World(float Value)
+{
+    if (Value != 0.0f)
+    {
+        AddMovementInput(FVector::UpVector, Value * MOVSPEED_CALCULATION);
+    }
+}
+
+FORCEINLINE void ARTS_Character::ScreenEdgeControl(float DeltaTime)
 {
     // @note    'FORCEINLINE' действует в пределах данного '.cpp'
     if (bScreenEdgeControl)
     {
         if (CurrentViewport)
         {
-            // Получение размера экрана (может изменяться в процессе игры)
-            FIntPoint lSize = CurrentViewport->GetSizeXY();
-
-            /* Получение зоны чувствительности экрана
-            @note   Необходим для уменьшения количества операций обязательного умножения */
-            FIntPoint lSizeZone = FIntPoint(
-                lSize.X * SensitiveZonePercentage.X,
-                lSize.Y * SensitiveZonePercentage.Y
-            );
-
             // Получение текущей позиции курсора
             FIntPoint lPos;
             CurrentViewport->GetMousePos(lPos);
 
-            // Вычисленная скорость перемещения
-            FVector Speed = FVector(0);
+            if (lPos != FIntPoint::NoneValue)
+            {
+                // Вычисленная скорость перемещения
+                FVector Speed = FVector::ZeroVector;
 
-            if (lPos.X < lSizeZone.X)
-            {
-                Speed.Y = (float(-lPos.X) / float(lSizeZone.X)) + 1;
-            }
-            else if (lSize.X - lPos.X < lSizeZone.X)
-            {
-                Speed.Y = (float(lSize.X - lPos.X) / float(lSizeZone.X)) - 1;
-            }
+                if (lPos.X < SensitiveZone.X)
+                {
+                    Speed.Y = (float(lPos.X) / SensitiveZone.X) - 1;
+                }
+                else if (CurrentSize.X - lPos.X < SensitiveZone.X)
+                {
+                    Speed.Y = (float(lPos.X - CurrentSize.X) / SensitiveZone.X) + 1;
+                }
 
-            if (lPos.Y < lSizeZone.Y)
-            {
-                Speed.X = (float(lPos.Y) / float(lSizeZone.Y)) - 1;
-            }
-            else if (lSize.Y - lPos.Y < lSizeZone.Y)
-            {
-                Speed.X = (float(lPos.Y - lSize.Y) / float(lSizeZone.Y)) + 1;
-            }
+                if (lPos.Y < SensitiveZone.Y)
+                {
+                    Speed.X = (float(-lPos.Y) / SensitiveZone.Y) + 1;
+                }
+                else if (CurrentSize.Y - lPos.Y < SensitiveZone.Y)
+                {
+                    Speed.X = (float(CurrentSize.Y - lPos.Y) / SensitiveZone.Y) - 1;
+                }
 
-            if (Speed.X || Speed.Y)
-            {
-                AddMovementInput(Speed, MOVSPEED_CALCULATION);
+                if (Speed.X || Speed.Y)
+                {
+                    AddMovementInput(GetTransform().TransformVectorNoScale(Speed),
+                        (CameraDistance_Setpoint + 500) * MovementSpeed * DeltaTime);
+                }
             }
         }
-        else
-        {
-            if (ARTS_PlayerController* lPC = Cast<ARTS_PlayerController>(GetController()))
-            {
-                CurrentViewport = lPC->GetCurrentViewport();
-            }
-        }
+    }
+}
+
+FORCEINLINE void ARTS_Character::InitScreenEdgeControl()
+{
+    // @note    'FORCEINLINE' действует в пределах данного '.cpp'
+
+    if (ARTS_PlayerController* lPC = GetController<ARTS_PlayerController>())
+    {
+        OnViewportResized(lPC->GetCurrentViewport(), 0);
+        FViewport::ViewportResizedEvent.AddUObject(this, &ARTS_Character::OnViewportResized);
+    }
+    else
+    {
+        M_Error("'Controller' is NOT 'ARTS_PlayerController'");
+    }
+}
+
+void ARTS_Character::OnViewportResized(FViewport* Viewport, uint32 Params)
+{
+    CurrentViewport = Viewport;
+
+    if (CurrentViewport)
+    {
+        // Получение размера экрана (может изменяться в процессе игры)
+        CurrentSize = CurrentViewport->GetSizeXY();
+
+        /* Получение зоны чувствительности экрана
+        @note   Необходим для уменьшения количества операций обязательного умножения */
+        SensitiveZone = FVector2D(
+            CurrentSize.X * SensitiveZonePercentage.X,
+            CurrentSize.Y * SensitiveZonePercentage.Y
+        );
+
+        bScreenEdgeControl = true;
     }
 }
 //--------------------------------------------------------------------------------------
@@ -245,28 +299,49 @@ FORCEINLINE void ARTS_Character::ScreenEdgeControl()
 
 /* ---   Inputs | Camera   --- */
 
-void ARTS_Character::MoveCamera(float Value)
+void ARTS_Character::TurnAtRate(float Rate)
 {
-    if (Value != 0)
+    // Обход логики из родительского класса 'ASpectatorPawn'
+    Super::Super::TurnAtRate(Rate);
+}
+
+void ARTS_Character::LookUpAtRate(float Rate)
+{
+    if (Rate != 0)
     {
-        CameraHeight_Setpoint = FMath::Clamp(
-            CameraHeight_Setpoint + (Value * CameraHeight_SetpointChangeSpeed * CameraHeight_Setpoint),
-            CameraHeight_Range.X,
-            CameraHeight_Range.Y);
+        FRotator CurRot = SpringArm->GetRelativeRotation();
+
+        CurRot.Pitch = FMath::Clamp(
+            CurRot.Pitch + (Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds() * CustomTimeDilation),
+            CameraRotation_LookUpRange.X,
+            CameraRotation_LookUpRange.Y);
+
+        SpringArm->SetRelativeRotation(CurRot);
     }
 }
 
-FORCEINLINE void ARTS_Character::CameraHeightControl(float DeltaTime)
+void ARTS_Character::CameraRange(float Value)
+{
+    if (Value != 0)
+    {
+        CameraDistance_Setpoint = FMath::Clamp(
+            CameraDistance_Setpoint + (Value * CameraDistance_SetpointChangeSpeed * CameraDistance_Setpoint),
+            CameraDistance_Range.X,
+            CameraDistance_Range.Y);
+    }
+}
+
+FORCEINLINE void ARTS_Character::CameraRangeControl(float DeltaTime)
 {
     // @note    'FORCEINLINE' действует в пределах данного '.cpp'
-    if (CameraHeight_Setpoint != SpringArm->TargetArmLength)
+    if (CameraDistance_Setpoint != SpringArm->TargetArmLength)
     {
-        float lDelta = CameraHeight_Setpoint - SpringArm->TargetArmLength;
-        SpringArm->TargetArmLength += lDelta * DeltaTime * CameraHeight_ChangeSpeed;
+        float lDelta = CameraDistance_Setpoint - SpringArm->TargetArmLength;
+        SpringArm->TargetArmLength += lDelta * DeltaTime * CameraDistance_ChangeSpeed;
 
-        if (UKismetMathLibrary::NearlyEqual_FloatFloat(CameraHeight_Setpoint, SpringArm->TargetArmLength, 1.f))
+        if (FMath::IsNearlyEqual(CameraDistance_Setpoint, SpringArm->TargetArmLength, 1.f))
         {
-            SpringArm->TargetArmLength = CameraHeight_Setpoint;
+            SpringArm->TargetArmLength = CameraDistance_Setpoint;
         }
     }
 }
@@ -278,71 +353,29 @@ FORCEINLINE void ARTS_Character::CameraHeightControl(float DeltaTime)
 
 #if WITH_EDITOR
 
-/* ---   Inputs   --- */
+/* ---   Debugs   --- */
 
-TArray<FName> ARTS_Character::GetActionGroupsNames()
-{
-    TArray<FName> ActionNames;
-
-    UInputSettings::GetInputSettings()->GetActionNames(ActionNames);
-    ActionNames.Add(NAME_None);
-
-    return ActionNames;
+#define CheckPropertyName(Param) \
+{ \
+    if(PropertyName == GET_MEMBER_NAME_CHECKED(ARTS_Character, Param)) \
+        CheckAxisGroups({ Param }); \
 }
 
-TArray<FName> ARTS_Character::GetAxisGroupsNames()
+void ARTS_Character::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-    TArray<FName> AxisNames;
+    Super::PostEditChangeProperty(PropertyChangedEvent);
 
-    UInputSettings::GetInputSettings()->GetAxisNames(AxisNames);
-    AxisNames.Add(NAME_None);
-
-    return AxisNames;
-}
-
-void ARTS_Character::CheckInputsGroups()
-{
-    //TArray<FName> lUsed_Actions = {
-    //    ActionGroups_Test,
-    //};
-
-    //TArray<FName> lArray_ActionNames;
-    //UInputSettings::GetInputSettings()->GetActionNames(lArray_ActionNames);
-
-    //for (FName& Data : lUsed_Actions)
-    //{
-    //    if (Data == NAME_None)
-    //    {
-    //        M_LOG(Warning, "Not used at least one of the Actions ('%s')",
-    //            *Data.ToString());
-    //    }
-    //    else if (lArray_ActionNames.Find(Data) == INDEX_NONE)
-    //    {
-    //        M_Error("'%s' is NOT an Action",
-    //            *Data.ToString());
-    //    }
-    //}
-
-    TArray<FName> lUsed_Axis = {
-        AxisGroups_MoveForward,
-        AxisGroups_MoveRight,
-    };
-
-    TArray<FName> lArray_AxisNames;
-    UInputSettings::GetInputSettings()->GetAxisNames(lArray_AxisNames);
-
-    for (FName& Data : lUsed_Axis)
+    if (PropertyChangedEvent.Property)
     {
-        if (Data == NAME_None)
-        {
-            M_LOG(Warning, "Not used at least one of the Axes ('%s')",
-                *Data.ToString());
-        }
-        else if (lArray_AxisNames.Find(Data) == INDEX_NONE)
-        {
-            M_Error("'%s' is NOT an Axis",
-                *Data.ToString());
-        }
+        // Здесь можно написать логику проверки изменённого свойства.
+        FName PropertyName = PropertyChangedEvent.Property->GetFName();
+
+        CheckPropertyName(AxisGroups_MoveForward);
+        CheckPropertyName(AxisGroups_MoveRight);
+        CheckPropertyName(AxisGroups_MoveUp);
+        CheckPropertyName(AxisGroups_Turn);
+        CheckPropertyName(AxisGroups_LookUp);
+        CheckPropertyName(AxisGroups_CameraDistance);
     }
 }
 //--------------------------------------------------------------------------------------
