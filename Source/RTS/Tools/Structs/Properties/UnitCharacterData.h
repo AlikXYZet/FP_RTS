@@ -30,11 +30,17 @@ struct FUnitCharacterData
 
     /* ---   Data   --- */
 
+    /* Радиус Патрулирования */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite,
+        Category = "Unit Character Data: Attack",
+        meta = (ClampMin = "0", UIMin = "0"))
+    float PatrolRadius = 500.f;
+
     /* Дистанция Атаки */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
         Category = "Unit Character Data: Attack",
         meta = (ClampMin = "0", UIMin = "0"))
-    float AttackDistance = 0.2f;
+    float AttackDistance = 100.f;
 
     /* Anim Montage: Атака */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,

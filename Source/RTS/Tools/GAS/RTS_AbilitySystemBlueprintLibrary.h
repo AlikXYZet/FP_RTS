@@ -45,7 +45,7 @@ class RTS_API URTS_AbilitySystemBlueprintLibrary : public UBlueprintFunctionLibr
 #if WITH_EDITOR
         else
         {
-            M_LOG_Static(Warning, "'%s' does NOT Implement 'Ability System Interface'",
+            M_LOG_Static(Log, "'%s' does NOT Implement 'Ability System Interface'",
                 Actor ? *Actor->GetName() : *STRING_None);
 
             lASC = Actor ? Actor->FindComponentByClass<UAbilitySystemComponent>() : nullptr;
@@ -76,7 +76,7 @@ class RTS_API URTS_AbilitySystemBlueprintLibrary : public UBlueprintFunctionLibr
 #if WITH_EDITOR
         else
         {
-            M_LOG_Static(Warning, "'%s' does NOT Implement 'RTS Ability System Interface'",
+            M_LOG_Static(Log, "'%s' does NOT Implement 'RTS Ability System Interface'",
                 Actor ? *Actor->GetName() : *STRING_None);
 
             EIsValid lValidity = EIsValid::IsNOT_Valid;
@@ -114,7 +114,7 @@ class RTS_API URTS_AbilitySystemBlueprintLibrary : public UBlueprintFunctionLibr
 #if WITH_EDITOR
         else
         {
-            M_LOG_Static(Warning, "'%s' does NOT Implement 'RTS Ability System Interface'",
+            M_LOG_Static(Log, "'%s' does NOT Implement 'RTS Ability System Interface'",
                 Actor ? *Actor->GetName() : *STRING_None);
 
             if (UAbilitySystemComponent* lASC = GetValidAbilitySystemComponent(Actor, Validity))

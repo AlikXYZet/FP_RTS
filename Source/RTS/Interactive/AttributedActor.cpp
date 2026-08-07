@@ -37,28 +37,28 @@ AAttributedActor::AAttributedActor()
 
     /* ---   Components   --- */
 
-    // Корневой компонент
-    RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-
     // Меш визуализации
     StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
-    StaticMesh->SetupAttachment(RootComponent);
+    RootComponent = StaticMesh;
     StaticMesh->SetCollisionProfileName(ProfileName_Destructible);
     StaticMesh->SetCustomDepthStencilValue(1);
     StaticMesh->bReceivesDecals = false;
 
     // Декаль выделения данного Персонажа
     Decal = CreateDefaultSubobject<UDecalComponent>(TEXT("Decal"));
-    Decal->SetupAttachment(RootComponent);
+    Decal->SetupAttachment(StaticMesh);
     //Decal->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
     Decal->SetUsingAbsoluteRotation(true);
     Decal->SetRelativeRotation(FRotator(90.f, 0.f, 0.f));
+    Decal->SetUsingAbsoluteScale(true);
     Decal->SetRelativeScale3D(FVector(0.3f));
     Decal->SetHiddenInGame(true);
 
     /* Виджет отображения Атрибутов данного Актора */
     AttributesWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Attributes Widget"));
     AttributesWidget->SetupAttachment(RootComponent);
+    AttributesWidget->SetUsingAbsoluteRotation(true);
+    AttributesWidget->SetUsingAbsoluteScale(true);
     AttributesWidget->SetHiddenInGame(true);
     //-------------------------------------------
 

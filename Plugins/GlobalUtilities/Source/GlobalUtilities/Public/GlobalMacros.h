@@ -25,12 +25,14 @@ GLOBALUTILITIES_API DECLARE_LOG_CATEGORY_EXTERN(LogGUP, All, All);
 #define ECC_Pickables       ECC_GameTraceChannel1   // Канал трассировки "Pickables" ("Подбираемые предметы")
 #define ECC_MouseSelection  ECC_GameTraceChannel2   // Канал трассировки "Mouse Selection" ("Выбор Мыши")
 #define ECC_WorldZone       ECC_GameTraceChannel3   // Канал трассировки "World Zone" ("Мировая Зона", она же Граница карты)
+
 #define ProfileName_Destructible            TEXT("Destructible")
 #define ProfileName_InvisibleWallDynamic    TEXT("InvisibleWallDynamic")
 #define ProfileName_Trigger                 TEXT("Trigger")
 #define ProfileName_InvisibleWall           TEXT("InvisibleWall")
 #define ProfileName_Pickables               TEXT("Pickables")
 #define ProfileName_Spectator               TEXT("Spectator")
+#define ProfileName_PhysicsActor            TEXT("PhysicsActor")
 
 // Соответствие проверено опытным путём:
 #define EOT_Pawn            EObjectTypeQuery::ObjectTypeQuery3 // [2]: for ECollisionChannel::ECC_Pawn, [2]

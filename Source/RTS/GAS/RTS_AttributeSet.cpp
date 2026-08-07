@@ -172,12 +172,12 @@ void URTS_AttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Attribu
     }
     else
     {
-        // Ограничение по верхнему диапазону с проверкой в порядке от более часто изменяемого к редкому
+        // Проверка тегов в порядке от более часто изменяемого к редкому
         if (Attribute == GetArmorAttribute())
         {
             if (NewValue >= GetMaxArmor())
             {
-                NewValue = GetMaxArmor();
+                //NewValue = GetMaxArmor();
                 GetOwningAbilitySystemComponent()->AddLooseGameplayTag(
                     RTS_GameplayTags::GameplayState_Armor_Max);
             }
@@ -186,7 +186,7 @@ void URTS_AttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Attribu
         {
             if (NewValue >= GetMaxHealth())
             {
-                NewValue = GetMaxHealth();
+                //NewValue = GetMaxHealth();
                 GetOwningAbilitySystemComponent()->AddLooseGameplayTag(
                     RTS_GameplayTags::GameplayState_Health_Max);
             }
