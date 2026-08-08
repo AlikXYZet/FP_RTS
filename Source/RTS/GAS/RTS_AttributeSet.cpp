@@ -177,7 +177,7 @@ void URTS_AttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Attribu
         {
             if (NewValue >= GetMaxArmor())
             {
-                //NewValue = GetMaxArmor();
+                NewValue = GetMaxArmor();
                 GetOwningAbilitySystemComponent()->AddLooseGameplayTag(
                     RTS_GameplayTags::GameplayState_Armor_Max);
             }
@@ -186,7 +186,7 @@ void URTS_AttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Attribu
         {
             if (NewValue >= GetMaxHealth())
             {
-                //NewValue = GetMaxHealth();
+                NewValue = GetMaxHealth();
                 GetOwningAbilitySystemComponent()->AddLooseGameplayTag(
                     RTS_GameplayTags::GameplayState_Health_Max);
             }

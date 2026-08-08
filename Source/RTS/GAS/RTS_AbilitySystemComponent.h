@@ -70,10 +70,10 @@ public:
 
     /* ---   GAS | Attributes   --- */
 
-    // Стартовые значения Атрибутов
+    /* Стартовые значения Атрибутов */
     UPROPERTY(EditAnywhere,
         Category = "RTS Ability System Component|Attributes",
-        meta = (ForceInlineRow, NoElementDuplicate))
+        meta = (ForceInlineRow))
     TMap<FGameplayAttribute, float> StartingAttributes;
     //-------------------------------------------
 
