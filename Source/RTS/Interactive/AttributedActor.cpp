@@ -17,6 +17,7 @@
 
 // Interaction:
 #include "RTS/ActorComponents/Properties/InteractiveComponent.h"
+#include "RTS/Core/RTS_GameMode.h"
 //--------------------------------------------------------------------------------------
 
 
@@ -167,5 +168,35 @@ void AAttributedActor::SetSelectionMode_Implementation(EActorSelectionMode Mode)
 EActorSelectionMode AAttributedActor::GetSelectionMode() const
 {
     return CurrentSelectionMode;
+}
+//--------------------------------------------------------------------------------------
+
+
+
+/* ---   Statistics   --- */
+
+const FFactionData& AAttributedActor::GetFactionData() const
+{
+    if (GetRTSGameMode())
+    {
+        return GetRTSGameMode()->GetFactionDataByID(TeamID);
+    }
+
+#if WITH_EDITOR
+
+    else if (ReserveFactionsData)
+    {
+        TArray<FFactionData*> lAllRows;
+        ReserveFactionsData->GetAllRows<FFactionData>(__FUNCTION__, lAllRows);
+
+        if (lAllRows.IsValidIndex(TeamID))
+        {
+            return *lAllRows[TeamID];
+        }
+    }
+
+#endif // WITH_EDITOR
+
+    return FFactionData::Empty;
 }
 //--------------------------------------------------------------------------------------

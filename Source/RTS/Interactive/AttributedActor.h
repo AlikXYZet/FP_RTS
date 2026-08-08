@@ -14,6 +14,9 @@
 #include "RTS/Tools/Interfaces/Properties/InteractiveInterface.h"
 #include "RTS/Tools/Interfaces/Properties/SelectableActorInterface.h"
 
+// Structs:
+#include "RTS/Tools/Structs/Properties/FactionData.h"
+
 // Interaction:
 #include "RTS/GAS/RTS_AbilitySystemComponent.h"
 
@@ -181,6 +184,16 @@ public:
 
 
 
+    /* ---   Statistics   --- */
+
+    /** Получить данные о Фракци */
+    UFUNCTION(BlueprintPure,
+        Category = "Attributed Actor|Statistics")
+    const FFactionData& GetFactionData() const;
+    //-------------------------------------------
+
+
+
 private:
 
     /* ---   Interface: GAS   --- */
@@ -212,4 +225,24 @@ private:
         Category = "Attributed Actor|Generic Team Agent")
     FGenericTeamId TeamID;
     //-------------------------------------------
+
+
+
+    /* ===   For EDITOR only   === */
+
+#if WITH_EDITORONLY_DATA
+
+private:
+
+    /* ---   Statistics   --- */
+
+    /* Таблица Данных: Данные Фракций
+    @note   Используется как заглушка, при отсутствии "GameMode" в режиме редактора */
+    UPROPERTY(EditDefaultsOnly,
+        Category = "Attributed Actor|Statistics",
+        meta = (NoResetToDefault, RequiredAssetDataTags = "RowStructure=FactionData"))
+    UDataTable* ReserveFactionsData = nullptr;
+    //-------------------------------------------
+
+#endif // WITH_EDITORONLY_DATA
 };

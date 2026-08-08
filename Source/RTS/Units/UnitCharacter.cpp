@@ -92,7 +92,7 @@ void AUnitCharacter::BeginPlay()
 
     InitAbilitySystemComp();
 
-    if (GetRTSGameMode())
+    if (ARTS_GameModeBase::IsValidStaticPointer())
     {
         GetRTSGameMode()->UnitRegistration(this);
     }
@@ -233,7 +233,7 @@ void AUnitCharacter::OnZeroHealth()
 
     if (GetRTSGameMode())
     {
-        GetRTSGameMode()->RegisteringUnitDestruction(this);
+        GetRTSGameMode()->UnitDestructionRegistration(this);
     }
 
     SetLifeSpan(10.f);
@@ -259,6 +259,23 @@ void AUnitCharacter::SetSelectionMode_Implementation(EActorSelectionMode Mode)
 EActorSelectionMode AUnitCharacter::GetSelectionMode() const
 {
     return CurrentSelectionMode;
+}
+//--------------------------------------------------------------------------------------
+
+
+
+/* ---   Interface: Generic Team Agent   --- */
+
+void AUnitCharacter::SetGenericTeamId(const FGenericTeamId& NewTeamID)
+{
+    if (TeamID != NewTeamID)
+    {
+        GetRTSGameMode()->UnitDestructionRegistration(this);
+
+        TeamID = NewTeamID;
+
+        GetRTSGameMode()->UnitRegistration(this);
+    }
 }
 //--------------------------------------------------------------------------------------
 

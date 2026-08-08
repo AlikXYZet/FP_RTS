@@ -46,7 +46,7 @@ public:
     {
         if (!IsValid(CurrentGameInstance))
         {
-            M_LOG_Empty(Error,
+            M_Error_Empty(
                 "Current GameInstance is NOT 'URTS_GameInstance' class. "
                 "See 'Project Settings'/'Maps & Modes'/'Game Instance Class'");
 

@@ -4,6 +4,7 @@
 #include "RTS_GameMode.h"
 
 // Interaction:
+#include "RTS/Interactive/AttributedActor.h"
 #include "RTS/Units/UnitCharacter.h"
 #include "RTS_GameState.h"
 //--------------------------------------------------------------------------------------
@@ -81,7 +82,7 @@ void ARTS_GameModeBase::Destroyed()
 
 /* ---   Statistics   --- */
 
-void ARTS_GameModeBase::UnitRegistration(AUnitCharacter* Unit)
+void ARTS_GameModeBase::UnitRegistration(const AUnitCharacter* Unit)
 {
     if (AllFactions.Num())
     {
@@ -102,11 +103,62 @@ void ARTS_GameModeBase::UnitRegistration(AUnitCharacter* Unit)
     }
 }
 
-bool ARTS_GameModeBase::RegisteringUnitDestruction(const AUnitCharacter* Unit)
+bool ARTS_GameModeBase::UnitDestructionRegistration(const AUnitCharacter* Unit)
 {
     if (AllFactions.Num())
     {
         uint8 FracID = Unit->GetGenericTeamId().GetId();
+
+        if (FracID >= AllFactions.Num())
+        {
+            FracID = AllFactions.Num() - 1;
+        }
+
+        // Уменьшение Счётчика Юнитов соответствующей Фракции
+        AllFactions[FracID].Number -= 1;
+        OnChangingFactionUnitsNumber.Broadcast(FracID, AllFactions[FracID]);
+
+        if (AllFactions[FracID].Number <= 0)
+        {
+            OnFactionDestruction.Broadcast(FracID, AllFactions[FracID]);
+        }
+
+        return true;
+    }
+    else
+    {
+        M_Error("AllFactions is EMPTY");
+    }
+
+    return false;
+}
+
+void ARTS_GameModeBase::FactionActorRegistration(const AAttributedActor* Actor)
+{
+    if (AllFactions.Num())
+    {
+        uint8 FracID = Actor->GetGenericTeamId().GetId();
+
+        if (FracID >= AllFactions.Num())
+        {
+            FracID = AllFactions.Num() - 1;
+        }
+
+        // Увеличение Счётчика Юнитов соответствующей Фракции
+        AllFactions[FracID].Number += 1;
+        OnChangingFactionUnitsNumber.Broadcast(FracID, AllFactions[FracID]);
+    }
+    else
+    {
+        M_Error("AllFactions is EMPTY");
+    }
+}
+
+bool ARTS_GameModeBase::FactionActorDestructionRegistration(const AAttributedActor* Actor)
+{
+    if (AllFactions.Num())
+    {
+        uint8 FracID = Actor->GetGenericTeamId().GetId();
 
         if (FracID >= AllFactions.Num())
         {

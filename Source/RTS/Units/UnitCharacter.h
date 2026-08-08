@@ -176,10 +176,7 @@ public:
     /** Присваивает Идентификатор Команды (Номер Фракции) */
     UFUNCTION(BlueprintCallable,
         Category = "Unit Character|Generic Team Agent")
-    virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override
-    {
-        TeamID = NewTeamID;
-    };
+    virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
 
     /** Извлекает Идентификатор Команды в виде FGenericTeamId */
     UFUNCTION(BlueprintCallable,
@@ -245,8 +242,9 @@ private:
     /* ---   Generic Team Agent   --- */
 
     /* Номер Фракции данного Югита */
-    UPROPERTY(EditAnywhere,
-        Category = "Unit Character|Generic Team Agent")
+    UPROPERTY(EditAnywhere, BlueprintReadOnly,
+        Category = "Unit Character|Generic Team Agent",
+        meta = (AllowPrivateAccess = true, ExposeOnSpawn = true))
     FGenericTeamId TeamID;
     //-------------------------------------------
 

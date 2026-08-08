@@ -52,7 +52,7 @@ public:
     {
         if (!IsValid(CurrentLocalController))
         {
-            M_LOG_Empty(Error,
+            M_Error_Empty(
                 "Current GameState is NOT 'ARTS_GameStateBase' class. "
                 "See Settings of current 'Game Mode'");
 

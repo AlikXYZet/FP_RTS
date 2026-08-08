@@ -28,6 +28,7 @@ static ARTS_GameModeBase* const GetRTSGameMode();
 
 // Interaction:
 class AUnitCharacter;
+class AAttributedActor;
 //--------------------------------------------------------------------------------------
 
 
@@ -77,7 +78,7 @@ public:
     {
         if (!IsValid(CurrentGameMode))
         {
-            M_LOG_Empty(Error,
+            M_Error_Empty(
                 "Current GameMode is NOT 'ARTS_GameModeBase' class. "
                 "See 'World Settings'");
 
@@ -149,11 +150,21 @@ public:
 
     //
 
-    /** Регистрация Юнита */
-    void UnitRegistration(AUnitCharacter* Unit);
+    /** Регистрация Юнита фракции */
+    void UnitRegistration(const AUnitCharacter* Unit);
 
-    /** Регистрация уничтожения Юнита */
-    bool RegisteringUnitDestruction(const AUnitCharacter* Unit);
+    /** Регистрация уничтожения Юнита фракции */
+    bool UnitDestructionRegistration(const AUnitCharacter* Unit);
+
+    /** Регистрация Актора фракции */
+    UFUNCTION(BlueprintCallable,
+        Category = "RTS Game Mode|Statistics")
+    void FactionActorRegistration(const AAttributedActor* Actor);
+
+    /** Регистрация уничтожения Актора фракции */
+    UFUNCTION(BlueprintCallable,
+        Category = "RTS Game Mode|Statistics")
+    bool FactionActorDestructionRegistration(const AAttributedActor* Actor);
 
     /** Получить данные о всех Фракциях */
     UFUNCTION(BlueprintPure,
@@ -168,7 +179,7 @@ public:
         Category = "RTS Game Mode|Statistics")
     const FFactionData& GetFactionData(const AUnitCharacter* Unit) const;
 
-    /** Получить данные о Фракци */
+    /** Получить данные о Фракци по его ID */
     UFUNCTION(BlueprintPure,
         Category = "RTS Game Mode|Statistics")
     const FFactionData& GetFactionDataByID(uint8 TeamID) const;
