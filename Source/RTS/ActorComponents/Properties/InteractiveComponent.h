@@ -68,6 +68,12 @@ public:
 
     /** Called when the game starts */
     virtual void BeginPlay() override;
+
+    /** Вызывается при Деактивации объекта */
+    virtual void Deactivate() override;
+
+    /** Вызывается при уничтожении Компонента */
+    virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
     //-------------------------------------------
 
 
@@ -110,11 +116,11 @@ private:
 
     /** Событие выделения Актора при наведении */
     UFUNCTION()
-    void CursorWasBeginOverOwner(AActor* TouchedActor);
+    void CursorWasBeginOverOwner(AActor* TouchedActor = nullptr);
 
     /** Событие прекращения выделения Актора при прекращении наведения */
     UFUNCTION()
-    void CursorWasEndFromOwner(AActor* TouchedActor);
+    void CursorWasEndFromOwner(AActor* TouchedActor = nullptr);
 
     /** Предварительная инициализация используемых Компонентов */
     UFUNCTION()

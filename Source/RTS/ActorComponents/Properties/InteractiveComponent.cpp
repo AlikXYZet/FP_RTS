@@ -27,6 +27,9 @@ UInteractiveComponent::UInteractiveComponent()
 
     // Используем InitializeComponent()
     bWantsInitializeComponent = true;
+
+    // Автоматическая активация по умолчанию
+    bAutoActivate = true;
     //-------------------------------------------
 }
 //--------------------------------------------------------------------------------------
@@ -47,6 +50,20 @@ void UInteractiveComponent::BeginPlay()
     InitHighlightedComponents();
     InitActionGroup();
 }
+
+void UInteractiveComponent::Deactivate()
+{
+    CursorWasEndFromOwner();
+
+    Super::Deactivate();
+}
+
+void UInteractiveComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
+{
+    CursorWasEndFromOwner();
+
+    Super::OnComponentDestroyed(bDestroyingHierarchy);
+}
 //--------------------------------------------------------------------------------------
 
 
@@ -55,14 +72,17 @@ void UInteractiveComponent::BeginPlay()
 
 void UInteractiveComponent::CursorWasBeginOverOwner(AActor* TouchedActor)
 {
-    if (IInteractiveInterface::CheckImplementation(GetOwner())
-        && IInteractiveInterface::Execute_CheckHighlightCondition(GetOwner()))
+    if (IsActive())
     {
-        for (FComponentRendering& Data : HighlightedComponents)
+        if (IInteractiveInterface::CheckImplementation(GetOwner())
+            && IInteractiveInterface::Execute_CheckHighlightCondition(GetOwner()))
         {
-            if (Data.Component)
+            for (FComponentRendering& Data : HighlightedComponents)
             {
-                Data.Component->SetRenderCustomDepth(true);
+                if (Data.Component)
+                {
+                    Data.Component->SetRenderCustomDepth(true);
+                }
             }
         }
     }
@@ -70,11 +90,14 @@ void UInteractiveComponent::CursorWasBeginOverOwner(AActor* TouchedActor)
 
 void UInteractiveComponent::CursorWasEndFromOwner(AActor* TouchedActor)
 {
-    for (FComponentRendering& Data : HighlightedComponents)
+    if (IsActive())
     {
-        if (Data.Component)
+        for (FComponentRendering& Data : HighlightedComponents)
         {
-            Data.Component->SetRenderCustomDepth(false);
+            if (Data.Component)
+            {
+                Data.Component->SetRenderCustomDepth(false);
+            }
         }
     }
 }
@@ -129,11 +152,14 @@ void UInteractiveComponent::InitActionGroup()
 
 void UInteractiveComponent::OwnerWasClicked(AActor* TouchedActor, FKey ButtonReleased)
 {
-    if (ActionKeys.Find(ButtonReleased)
-        && IInteractiveInterface::CheckImplementation(GetOwner())
-        && IInteractiveInterface::Execute_CheckActionConditions(GetOwner(), ButtonReleased))
+    if (IsActive())
     {
-        OnOwnerWasClicked.Broadcast(ButtonReleased);
+        if (ActionKeys.Find(ButtonReleased)
+            && IInteractiveInterface::CheckImplementation(GetOwner())
+            && IInteractiveInterface::Execute_CheckActionConditions(GetOwner(), ButtonReleased))
+        {
+            OnOwnerWasClicked.Broadcast(ButtonReleased);
+        }
     }
 }
 //--------------------------------------------------------------------------------------
