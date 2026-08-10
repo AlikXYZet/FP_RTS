@@ -93,17 +93,19 @@ private:
     /* ---   Settings System | Saving   --- */
 
     // Текущий GameUserSettings
+    UPROPERTY()
     UGameUserSettings* GameUserSettings = nullptr;
 
     // Наименование слотов сохранения данных Настроек
     FString SettingsDataSlot = "SettingsData";
 
     // Сохраняемые данные Настроек
+    UPROPERTY()
     USaveSettings* SaveSettings = nullptr;
 
     //
 
-    // Инициализация данных
+    /** Инициализация данных */
     void InitWidgetData();
     //-------------------------------------------
 };
