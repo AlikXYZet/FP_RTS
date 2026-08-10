@@ -19,7 +19,7 @@
 UENUM(BlueprintType)
 enum struct EActorSelectionMode : uint8
 {
-    NotSelected = 0     UMETA(DisplayName = "Not Selected"),
+    NotSelected = 0,
 
     ControlledFriend,
     ControlledEnemy,

@@ -48,8 +48,6 @@ ARTS_GameModeBase::ARTS_GameModeBase()
 void ARTS_GameModeBase::BeginPlay()
 {
     Super::BeginPlay();
-
-    InitStatistics();
 }
 
 void ARTS_GameModeBase::Tick(float DeltaSeconds)
@@ -65,6 +63,13 @@ void ARTS_GameModeBase::OnConstruction(const FTransform& Transform)
 
     CurrentGameMode = this;
     //-------------------------------------------
+}
+
+void ARTS_GameModeBase::PreInitializeComponents()
+{
+    Super::PreInitializeComponents();
+
+    InitStatistics();
 }
 
 void ARTS_GameModeBase::Destroyed()

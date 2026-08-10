@@ -133,6 +133,9 @@ public:
     @param	Transform	- Трансформация данного Актора */
     virtual void OnConstruction(const FTransform& Transform) override;
 
+    /** Вызывается перед инициализацией всех компонентов */
+    virtual void PreInitializeComponents() override;
+
     /** Вызывается, когда этот субъект явно уничтожается во время игрового процесса или в редакторе,
     * но не вызывается во время трансляции уровней или завершения игрового процесса */
     virtual void Destroyed() override;
