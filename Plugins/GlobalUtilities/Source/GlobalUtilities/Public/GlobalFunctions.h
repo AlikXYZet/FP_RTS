@@ -14,7 +14,6 @@
 #include "GameFramework/InputSettings.h"
 
 // C++:
-#include <cstdarg>
 #include <random>
 
 // Generated:
@@ -32,24 +31,26 @@
     template<class T, class = std::enable_if_t<is_check<T>>>
 */
 
-/** Является ли классом типа 'AActor' */
-template<class T>
-constexpr bool is_Actor = std::is_convertible<T*, AActor*>::value;
-
-
-/** Является ля контейнером */
-template<typename, typename = void>
-constexpr bool is_container = false;
-
-template<typename T>
-constexpr bool is_container<
-    T,
-    std::void_t<    // Проверки на наличие функций и переменных
-    decltype(std::declval<T>().begin()),
-    decltype(std::declval<T>().end()),
-    typename T::value_type
-    >
-> = true;
+// Warning: Вероятно, может вызвать проблемы с мультиплатформенностью проекта -- требуется отдельная проверка
+//
+///** Является ли классом типа 'AActor' */
+//template<class T>
+//constexpr bool is_Actor = std::is_convertible<T*, AActor*>::value;
+//
+//
+///** Является ля контейнером */
+//template<typename, typename = void>
+//constexpr bool is_container = false;
+//
+//template<typename T>
+//constexpr bool is_container<
+//    T,
+//    std::void_t<    // Проверки на наличие функций и переменных
+//    decltype(std::declval<T>().begin()),
+//    decltype(std::declval<T>().end()),
+//    typename T::value_type
+//    >
+//> = true;
 //----------------------------------------------------------------------------------------------------
 
 
@@ -75,7 +76,7 @@ static TArray<int32> GetNumbersSeries(int32 Begin, int32 End)
 /** Получить первый элемент мира соответствующего класса
 @note   Возможно, можно сильнее упростить получение "первого" элемента на карте по его типу.
         Однако, в местах текущего использования это не столь важно... */
-template <class ActorType,
+/*template <class ActorType,
     class = std::enable_if_t<is_Actor<ActorType>>>
 static ActorType* GetFirstActorOfType()
 {
@@ -91,7 +92,7 @@ static ActorType* GetFirstActorOfType()
 
         return nullptr;
     }
-}
+}*/
 //--------------------------------------------------------------------------------------
 
 
