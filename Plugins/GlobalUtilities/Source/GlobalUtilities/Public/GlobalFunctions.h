@@ -87,7 +87,7 @@ static ActorType* GetFirstActorOfType()
     }
     else
     {
-        M_Error("At Level there is NO Actor of '%s' class",
+        M_Error_Static("At Level there is NO Actor of '%s' class",
             *ActorType::StaticClass()->GetName());
 
         return nullptr;
