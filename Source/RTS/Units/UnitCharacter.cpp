@@ -172,13 +172,13 @@ void AUnitCharacter::InitAbilitySystemComp()
     {
         if (GetRTSAttributeSet())
         {
-            GAMEPLAYATTRIBUTE_VALUE_Delegating(Health);
-            GAMEPLAYATTRIBUTE_VALUE_Delegating(MaxHealth);
-            GAMEPLAYATTRIBUTE_VALUE_Delegating(Armor);
-            GAMEPLAYATTRIBUTE_VALUE_Delegating(MaxArmor);
+            GAMEPLAYATTRIBUTE_VALUE_Delegating(AUnitCharacter, Health);
+            GAMEPLAYATTRIBUTE_VALUE_Delegating(AUnitCharacter, MaxHealth);
+            GAMEPLAYATTRIBUTE_VALUE_Delegating(AUnitCharacter, Armor);
+            GAMEPLAYATTRIBUTE_VALUE_Delegating(AUnitCharacter, MaxArmor);
 
             GetRTSAttributeSet()->OnZeroHealth.AddUObject(this, &AUnitCharacter::OnZeroHealth);
-            GAMEPLAYATTRIBUTE_ZERO_Delegating(OnZeroArmor);
+            GAMEPLAYATTRIBUTE_ZERO_Delegating(AUnitCharacter, OnZeroArmor);
         }
     }
     else

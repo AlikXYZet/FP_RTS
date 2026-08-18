@@ -119,6 +119,14 @@ protected:
 
 
 
+    /* ---   Interface: GAS   --- */
+
+    /** Инициализация данных GAS */
+    void InitAbilitySystemComp() override;
+    //-------------------------------------------
+
+
+
 public:
 
     /* ---   Base   --- */
@@ -135,6 +143,12 @@ public:
     FORCEINLINE virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override
     {
         return AbilitySystemComp;
+    };
+
+    /** Возвращает Компонент Атрибутов данного Актора */
+    FORCEINLINE URTS_AttributeSet* GetRTSAttributeSet() const override
+    {
+        return AttributeSet;
     };
     //-------------------------------------------
 
@@ -195,20 +209,6 @@ public:
 
 
 private:
-
-    /* ---   Interface: GAS   --- */
-
-    /** Возвращает Компонент Атрибутов данного Актора */
-    FORCEINLINE URTS_AttributeSet* GetRTSAttributeSet() const override
-    {
-        return AttributeSet;
-    };
-
-    /** Инициализация данных GAS */
-    void InitAbilitySystemComp() override;
-    //-------------------------------------------
-
-
 
     /* ---   Selectable Actor   --- */
 

@@ -121,13 +121,13 @@ void AAttributedActor::InitAbilitySystemComp()
 
         if (GetRTSAttributeSet())
         {
-            GAMEPLAYATTRIBUTE_VALUE_Delegating(Health);
-            GAMEPLAYATTRIBUTE_VALUE_Delegating(MaxHealth);
-            GAMEPLAYATTRIBUTE_VALUE_Delegating(Armor);
-            GAMEPLAYATTRIBUTE_VALUE_Delegating(MaxArmor);
+            GAMEPLAYATTRIBUTE_VALUE_Delegating(AAttributedActor, Health);
+            GAMEPLAYATTRIBUTE_VALUE_Delegating(AAttributedActor, MaxHealth);
+            GAMEPLAYATTRIBUTE_VALUE_Delegating(AAttributedActor, Armor);
+            GAMEPLAYATTRIBUTE_VALUE_Delegating(AAttributedActor, MaxArmor);
 
-            GAMEPLAYATTRIBUTE_ZERO_Delegating(OnZeroHealth);
-            GAMEPLAYATTRIBUTE_ZERO_Delegating(OnZeroArmor);
+            GAMEPLAYATTRIBUTE_ZERO_Delegating(AAttributedActor, OnZeroHealth);
+            GAMEPLAYATTRIBUTE_ZERO_Delegating(AAttributedActor, OnZeroArmor);
         }
     }
     else

@@ -27,20 +27,20 @@
 	}
 
 /** Макрос: Подписка функции к делегату для передачи изменённого значения атрибутов GAS через Событие BP */
-#define GAMEPLAYATTRIBUTE_VALUE_Delegating(PropertyName) \
+#define GAMEPLAYATTRIBUTE_VALUE_Delegating(OwnerClass, PropertyName) \
     GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(GetRTSAttributeSet()->Get##PropertyName##Attribute()) \
-        .AddUObject(this, &IRTS_AbilitySystemInterface::Handle##PropertyName##Changed);
+        .AddUObject(this, &OwnerClass::Handle##PropertyName##Changed);
 
 /** Макрос: Создание функции делегата для передачи события нулевого значения атрибутов GAS через Событие BP */
 #define GAMEPLAYATTRIBUTE_ZERO_HandleEvent(PropertyName) \
-	FORCEINLINE void Handle##PropertyName##() \
+	FORCEINLINE void Handle##PropertyName() \
 	{ \
 		Execute_Event_##PropertyName(GetAbilitySystemComponent()->GetOwnerActor()); \
 	}
 
 /** Макрос: Подписка функции к делегату для передачи события нулевого значения атрибутов GAS через Событие BP */
-#define GAMEPLAYATTRIBUTE_ZERO_Delegating(PropertyName) \
-     GetRTSAttributeSet()->##PropertyName##.AddUObject(this, &IRTS_AbilitySystemInterface::Handle##PropertyName##);
+#define GAMEPLAYATTRIBUTE_ZERO_Delegating(OwnerClass, PropertyName) \
+     GetRTSAttributeSet()->PropertyName.AddUObject(this, &OwnerClass::Handle##PropertyName);
 //--------------------------------------------------------------------------------------
 
 
