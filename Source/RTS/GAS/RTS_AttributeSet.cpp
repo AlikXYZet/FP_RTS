@@ -27,19 +27,21 @@
 // Смещение значений Атрибутов, ниже которого Атрибут воспринимается как с Нулевым значением
 #define ZERO_VALUE_OFFSET 0.5f
 
+/*
 #define GAMEPLAYSTATE_CHECKVALUE_MAX(PropertyName) \
-    if (Get##PropertyName##() < GetMax##PropertyName##() \
-        && GetMax##PropertyName##() == NewValue) \
+    if (Get##PropertyName() < GetMax##PropertyName() \
+        && GetMax##PropertyName() == NewValue) \
     { \
         GetOwningAbilitySystemComponent()->AddLooseGameplayTag( \
             RTS_GameplayTags::GameplayState_##PropertyName##_Max); \
     } \
-    else if (Get##PropertyName##() == GetMax##PropertyName##() \
-        && GetMax##PropertyName##() > NewValue) \
+    else if (Get##PropertyName() == GetMax##PropertyName() \
+        && GetMax##PropertyName() > NewValue) \
     { \
         GetOwningAbilitySystemComponent()->RemoveLooseGameplayTag( \
             RTS_GameplayTags::GameplayState_##PropertyName##_Max, 3); \
     };
+*/
 //--------------------------------------------------------------------------------------
 
 
@@ -130,7 +132,20 @@ void URTS_AttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, 
                 3 /* Защита от многократного тега */);
         }
 
-        GAMEPLAYSTATE_CHECKVALUE_MAX(Armor);
+        if (GetArmor() < GetMaxArmor()
+            && GetMaxArmor() == NewValue)
+        {
+            GetOwningAbilitySystemComponent()->AddLooseGameplayTag(
+                RTS_GameplayTags::GameplayState_Armor_Max);
+        }
+        else if (GetArmor() == GetMaxArmor()
+            && GetMaxArmor() > NewValue)
+        {
+            GetOwningAbilitySystemComponent()->RemoveLooseGameplayTag(
+                RTS_GameplayTags::GameplayState_Armor_Max, 3);
+        };
+
+        //GAMEPLAYSTATE_CHECKVALUE_MAX(Armor);
     }
     else if (Attribute == GetHealthAttribute())
     {
@@ -143,7 +158,20 @@ void URTS_AttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, 
             OnZeroHealth.Broadcast();
         }
 
-        GAMEPLAYSTATE_CHECKVALUE_MAX(Health);
+        if (GetHealth() < GetMaxHealth()
+            && GetMaxHealth() == NewValue)
+        {
+            GetOwningAbilitySystemComponent()->AddLooseGameplayTag(
+                RTS_GameplayTags::GameplayState_Health_Max);
+        }
+        else if (GetHealth() == GetMaxHealth()
+            && GetMaxHealth() > NewValue)
+        {
+            GetOwningAbilitySystemComponent()->RemoveLooseGameplayTag(
+                RTS_GameplayTags::GameplayState_Health_Max, 3);
+        };
+
+        //GAMEPLAYSTATE_CHECKVALUE_MAX(Health);
     }
 
     Super::PreAttributeChange(Attribute, NewValue);
