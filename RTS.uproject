@@ -49,9 +49,29 @@
 			"Name": "AnimationBudgetAllocator",
 			"Enabled": true
 		},
-        {
-            "Name": "GlobalUtilities",
-            "Enabled": true
-        }
+		{
+			"Name": "GlobalUtilities",
+			"Enabled": true
+		},
+		{
+			"Name": "MagicLeapPassableWorld",
+			"Enabled": false,
+			"SupportedTargetPlatforms": [
+				"Lumin",
+				"Mac",
+				"Win64"
+			]
+		},
+		{
+			"Name": "LuminPlatformFeatures",
+			"Enabled": false,
+			"SupportedTargetPlatforms": [
+				"Lumin"
+			]
+		},
+		{
+			"Name": "MLSDK",
+			"Enabled": false
+		}
 	]
 }
