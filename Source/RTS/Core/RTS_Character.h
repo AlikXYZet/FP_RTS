@@ -8,6 +8,10 @@
 // Base:
 #include "GameFramework/SpectatorPawn.h"
 
+// Global:
+#include "GlobalFunctions.h"
+#include "GlobalMacros.h"
+
 // Generated:
 #include "RTS_Character.generated.h"
 //--------------------------------------------------------------------------------------
@@ -59,8 +63,14 @@ protected:
 
     /* ---   Base   --- */
 
-    // Вызывается при Запуске игры или при Спавне в уже запущенной игре
+    /** Вызывается при Запуске игры или при Спавне в уже запущенной игре */
     virtual void BeginPlay() override;
+
+    /** Получить Время между кадрами для текущего Мира */
+    FORCEINLINE float GetDeltaSeconds() const
+    {
+        return GetWorld()->GetDeltaSeconds();
+    };
     //-------------------------------------------
 
 
@@ -119,13 +129,6 @@ public:
             DisplayName = "Move Right"))
     FName AxisGroups_MoveRight = NAME_None;
 
-    /* Группа Осей: "Движение Вверх" (вверх-вниз) */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
-        Category = "RTS Character|Inputs|Axis",
-        meta = (GetOptions = "GlobalUtilities.BlueprintGlobalFunctions.GetAxisGroupsNames",
-            DisplayName = "Move Up"))
-    FName AxisGroups_MoveUp = NAME_None;
-
     /* Группа Осей: Обзора Камерой по горизонтали (вправо-влево) */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
         Category = "RTS Character|Inputs|Axis",
@@ -152,17 +155,31 @@ public:
 
     /* ---   Inputs | Movement   --- */
 
+    /* Скорость перемещения */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly,
+        Category = "RTS Character|Inputs|Movement",
+        meta = (ClampMin = 0.001f, UIMin = 0.001f, ClampMax = 1.f, UIMax = 1.f))
+    float MovementSpeed = 0.01f;
+
     /* Процент Зоны Чувствительности для управления через наведение мыши на Края Экрана */
     UPROPERTY(EditAnywhere,
         Category = "RTS Character|Inputs|Movement",
         meta = (AllowPreserveRatio, ClampMin = 0, UIMin = 0, ClampMax = 0.5f, UIMax = 0.5f))
     FVector2D SensitiveZonePercentage = FVector2D(0.1f);
 
-    /* Скорость перемещения */
-    UPROPERTY(EditAnywhere,
-        Category = "RTS Character|Inputs|Movement",
-        meta = (ClampMin = 0.001f, UIMin = 0.001f, ClampMax = 1.f, UIMax = 1.f))
-    float MovementSpeed = 0.005f;
+    /* Задержка обновления Целевой Высоты местоположения */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly,
+        Category = "RTS Character|Inputs|Movement|Height Control",
+        meta = (DisplayName = "Update Delay",
+            ClampMin = 0.01f, UIMin = 0.01f, ClampMax = 1.f, UIMax = 1.f))
+    float HeightControl_UpdateDelay = 0.1f;
+
+    /* Задержка обновления Целевой Высоты местоположения */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly,
+        Category = "RTS Character|Inputs|Movement|Height Control",
+        meta = (DisplayName = "Interpolation Speed",
+            ClampMin = 0.01f, UIMin = 0.01f, ClampMax = 1.f, UIMax = 1.f))
+    float HeightControl_InterpSpeed = 0.2f;
 
     //
 
@@ -203,9 +220,9 @@ public:
     /* Скорость изменения Задания дальности камеры */
     UPROPERTY(EditAnywhere,
         Category = "RTS Character|Inputs|Camera|Distance",
-        meta = (DisplayName = "Setpoint Change Speed",
+        meta = (DisplayName = "Setpoint Change Step",
             ClampMin = 0.01f, UIMin = 0.01f, ClampMax = 1, UIMax = 1))
-    float CameraDistance_SetpointChangeSpeed = 0.1f;
+    float CameraDistance_SetpointChangeStep = 0.1f;
 
     /* Скорость Поворота камеры */
     UPROPERTY(EditAnywhere,
@@ -228,8 +245,19 @@ private:
 
     /* ---   Inputs | Movement   --- */
 
-    /** Флаг управления через наведение мыши на Край Экрана */
-    bool bScreenEdgeControl = true;
+    /** Ввод передвижения: вперёд-назад */
+    virtual void MoveForward(float Value) override;
+
+    /** Ввод передвижения: вправо-влево */
+    virtual void MoveRight(float Value) override;
+
+    /** Ввод передвижения: вверх-вниз */
+    virtual void MoveUp_World(float Val) override;
+    //-------------------------------------------
+
+
+
+    /* ---   Inputs | Movement | Screen Edge Control   --- */
 
     /* Текущее Окно просмотра Пользователя
     @note   Используется для уменьшения количества операций при отслеживании мыши,
@@ -239,19 +267,10 @@ private:
     /* Текущий размера экрана (может изменяться в процессе игры) */
     FIntPoint CurrentSize = FIntPoint::ZeroValue;
 
-    /* Расчитанная Зона Чувствительности для управления через наведение мыши на Края Экрана */
+    /* Рассчитанная Зона Чувствительности для управления через наведение мыши на Края Экрана */
     FVector2D SensitiveZone = FVector2D::ZeroVector;
 
     //
-
-    /** Ввод передвижения: вперёд-назад */
-    virtual void MoveForward(float Value) override;
-
-    /** Ввод передвижения: вправо-влево */
-    virtual void MoveRight(float Value) override;
-
-    /** Ввод передвижения: вверх-вниз */
-    virtual void MoveUp_World(float Val) override;
 
     /** Управление с помощью Краёв Экрана */
     void ScreenEdgeControl(float DeltaTime);
@@ -259,8 +278,59 @@ private:
     /** Инициализация: Управление краем экрана */
     void InitScreenEdgeControl();
 
-    /** Событме: При изменении размера окна просмотра */
+    /** Событие: При изменении размера окна просмотра */
     void OnViewportResized(FViewport* Viewport, uint32 Params);
+    //-------------------------------------------
+
+
+
+    /* ---   Inputs | Movement | Height Control   --- */
+
+    /* Результат трассировки: Контроль Высоты местоположения */
+    FHitResult Hit_HeightControl;
+
+    /* Таймер: Контроль Высоты местоположения
+    @note   При необходимости вызывать ещё какой-нибудь метод с фиксированной частотой (например 2 или 10 Hz),
+            следует сделать свой дополнительный аналог "Event Tick" на таймере,
+            объединить вызовы методов и добавить флаги их контроля */
+    FTimerHandle Timer_HeightControl;
+
+    //
+
+    /** Получить Целевую Высоту местоположения */
+    FORCEINLINE const float GetTargetLocationHeight() const
+    {
+        return Hit_HeightControl.ImpactPoint.Z;
+    };
+
+    /** Контроль Высоты для данного Игрока */
+    void LocationHeightControl(float DeltaTime);
+
+    /** Обновить Целевую Высоту местоположения */
+    UFUNCTION()
+    void UpdateTargetLocationHeight();
+
+    /** Приостановить таймер Контроля Высоты местоположения */
+    FORCEINLINE void PauseHeightControl()
+    {
+        if (bHeightControl)
+        {
+            GetWorldTimerManager().PauseTimer(Timer_HeightControl);
+            bHeightControl = false;
+        }
+    };
+
+    /** Запустить таймер Контроля Высоты местоположения */
+    FORCEINLINE void UnPauseHeightControl()
+    {
+        if (!bHeightControl)
+        {
+            GetWorldTimerManager().UnPauseTimer(Timer_HeightControl);
+        }
+    };
+
+    /** Инициализация: Контроль Высоты местоположения */
+    void InitHeightControl();
     //-------------------------------------------
 
 
@@ -279,6 +349,38 @@ private:
     /** Контроль Высоты Камеры */
     void CameraRangeControl(float DeltaTime);
     //-------------------------------------------
+
+
+
+    /* ===   ONE BYTE   === */
+
+public:
+
+    /* ---   Inputs | Movement | Height Control   --- */
+
+    /* Тип трассировки для системы Контроля Высоты Игрока */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly,
+        Category = "RTS Character|Inputs|Movement|Height Control",
+        meta = (DisplayName = "Trace Type"))
+    TEnumAsByte<ETraceTypeQuery> HeightControl_TraceType = ETraceTypeQuery::TraceTypeQuery4;
+    //-------------------------------------------
+
+
+private:
+
+    /* ---   Inputs | Movement | Screen Edge Control   --- */
+
+    /* Флаг управления через наведение мыши на Край Экрана */
+    bool bScreenEdgeControl = true;
+    //-------------------------------------------
+
+
+    /* ---   Inputs | Movement | Height Control   --- */
+
+    /* Флаг Контроля Высоты местоположения */
+    bool bHeightControl = true;
+    //-------------------------------------------
+    //===========================================
 
 
 

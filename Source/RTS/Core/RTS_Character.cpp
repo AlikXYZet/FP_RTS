@@ -3,16 +3,13 @@
 // Base:
 #include "RTS_Character.h"
 
-// Global:
-#include "GlobalFunctions.h"
-#include "GlobalMacros.h"
-
 // UE:
 #include "Camera/CameraComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/InputSettings.h"
 #include "GameFramework/SpectatorPawnMovement.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 // Interaction:
 #include "RTS_PlayerController.h"
@@ -60,7 +57,7 @@ ARTS_Character::ARTS_Character()
     /* Компонент перемещения "Наблюдателя", который инициализируется в родительском классе 'ASpectatorPawn' */
     if (USpectatorPawnMovement* lSPM = Cast<USpectatorPawnMovement>(GetMovementComponent()))
     {
-        lSPM->MaxSpeed = 1'200'000.f;
+        lSPM->MaxSpeed = 12'000.f;
         lSPM->Acceleration = 40'000.f;
         lSPM->Deceleration = 80'000.f;
     }
@@ -78,11 +75,12 @@ void ARTS_Character::BeginPlay()
 
     /* Учёт сетевых нюансов (использовать, при необходимости):
     Старт инициализации для Игрока-Клиента (`Listen Server`)
-    @note   Контроллер не валиден в моемент запуска Отложенного(!) матча
+    @note   Контроллер не валиден в момент запуска Отложенного(!) матча
             (если есть период ожидания начала матча при использовании кода класса 'AGameMode') */
             //if (!HasAuthority() && IsLocallyControlled())
     {
         InitScreenEdgeControl();
+        InitHeightControl();
     }
 }
 
@@ -92,6 +90,7 @@ void ARTS_Character::Tick(float DeltaTime)
 
     ScreenEdgeControl(DeltaTime);
     CameraRangeControl(DeltaTime);
+    LocationHeightControl(DeltaTime);
 }
 
 void ARTS_Character::PossessedBy(AController* NewController)
@@ -151,7 +150,6 @@ void ARTS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
     BindAxisGroups(AxisGroups_MoveForward, MoveForward);
     BindAxisGroups(AxisGroups_MoveRight, MoveRight);
-    BindAxisGroups(AxisGroups_MoveUp, MoveUp_World);
     //-------------------------------------------
 
 
@@ -173,7 +171,6 @@ void ARTS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
     CheckAxisGroups({
         AxisGroups_MoveForward,
         AxisGroups_MoveRight,
-        AxisGroups_MoveUp,
         AxisGroups_Turn,
         AxisGroups_LookUp,
         AxisGroups_CameraDistance });
@@ -189,13 +186,14 @@ void ARTS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 /* ---   Inputs | Movement   --- */
 
 /* Макрос: Расчёт Скорости Перемещения */
-#define MOVSPEED_CALCULATION (CameraDistance_Setpoint + 500) * MovementSpeed * 0.0167f
+#define MOVSPEED_CALCULATION (CameraDistance_Setpoint + 500) * MovementSpeed * GetDeltaSeconds()
 
 void ARTS_Character::MoveForward(float Value)
 {
     if (Value != 0.0f)
     {
         AddMovementInput(GetActorForwardVector(), Value * MOVSPEED_CALCULATION);
+        UnPauseHeightControl();
     }
 }
 
@@ -204,6 +202,7 @@ void ARTS_Character::MoveRight(float Value)
     if (Value != 0.0f)
     {
         AddMovementInput(GetActorRightVector(), Value * MOVSPEED_CALCULATION);
+        UnPauseHeightControl();
     }
 }
 
@@ -214,6 +213,11 @@ void ARTS_Character::MoveUp_World(float Value)
         AddMovementInput(FVector::UpVector, Value * MOVSPEED_CALCULATION);
     }
 }
+//--------------------------------------------------------------------------------------
+
+
+
+/* ---   Inputs | Movement | Screen Edge Control   --- */
 
 FORCEINLINE void ARTS_Character::ScreenEdgeControl(float DeltaTime)
 {
@@ -253,6 +257,8 @@ FORCEINLINE void ARTS_Character::ScreenEdgeControl(float DeltaTime)
                 {
                     AddMovementInput(GetTransform().TransformVectorNoScale(Speed),
                         (CameraDistance_Setpoint + 500) * MovementSpeed * DeltaTime);
+
+                    UnPauseHeightControl();
                 }
             }
         }
@@ -297,6 +303,60 @@ void ARTS_Character::OnViewportResized(FViewport* Viewport, uint32 Params)
 
 
 
+/* ---   Inputs | Movement | Height Control   --- */
+
+void ARTS_Character::LocationHeightControl(float DeltaTime)
+{
+    if (bHeightControl)
+    {
+        float lCurrZ = GetActorLocation().Z;
+
+        if (!FMath::IsNearlyEqual(lCurrZ, GetTargetLocationHeight(), 0.1f))
+        {
+            MoveUp_World((GetTargetLocationHeight() - lCurrZ) * HeightControl_InterpSpeed * DeltaTime);
+        }
+    }
+}
+
+void ARTS_Character::UpdateTargetLocationHeight()
+{
+    FVector lCurrLocation = GetActorLocation();
+
+    UKismetSystemLibrary::SphereTraceSingle(
+        GetWorld(),
+        FVector(lCurrLocation.X, lCurrLocation.Y, lCurrLocation.Z + CameraDistance_Range.Y),
+        FVector(lCurrLocation.X, lCurrLocation.Y, lCurrLocation.Z - CameraDistance_Range.Y),
+        CameraDistance_Setpoint,
+        HeightControl_TraceType,
+        false,
+        TArray<AActor*>(),
+        EDrawDebugTrace::None,
+        Hit_HeightControl,
+        true);
+
+    if (FMath::IsNearlyEqual(lCurrLocation.Z, GetTargetLocationHeight(), 0.1f))
+    {
+        PauseHeightControl();
+    }
+    else
+    {
+        bHeightControl = true;
+    }
+}
+
+void ARTS_Character::InitHeightControl()
+{
+    GetWorldTimerManager().SetTimer(
+        Timer_HeightControl,
+        this,
+        &ARTS_Character::UpdateTargetLocationHeight,
+        HeightControl_UpdateDelay,
+        true);
+}
+//--------------------------------------------------------------------------------------
+
+
+
 /* ---   Inputs | Camera   --- */
 
 void ARTS_Character::TurnAtRate(float Rate)
@@ -312,7 +372,7 @@ void ARTS_Character::LookUpAtRate(float Rate)
         FRotator CurRot = SpringArm->GetRelativeRotation();
 
         CurRot.Pitch = FMath::Clamp(
-            CurRot.Pitch + (Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds() * CustomTimeDilation),
+            CurRot.Pitch + (Rate * BaseLookUpRate * GetDeltaSeconds() * CustomTimeDilation),
             CameraRotation_LookUpRange.X,
             CameraRotation_LookUpRange.Y);
 
@@ -324,10 +384,16 @@ void ARTS_Character::CameraRange(float Value)
 {
     if (Value != 0)
     {
-        CameraDistance_Setpoint = FMath::Clamp(
-            CameraDistance_Setpoint + (Value * CameraDistance_SetpointChangeSpeed * CameraDistance_Setpoint),
+        float lSetpoint = FMath::Clamp(
+            CameraDistance_Setpoint + (Value * CameraDistance_SetpointChangeStep * CameraDistance_Setpoint),
             CameraDistance_Range.X,
             CameraDistance_Range.Y);
+
+        if (lSetpoint != CameraDistance_Setpoint)
+        {
+            CameraDistance_Setpoint = lSetpoint;
+            UnPauseHeightControl();
+        }
     }
 }
 
@@ -372,7 +438,6 @@ void ARTS_Character::PostEditChangeProperty(FPropertyChangedEvent& PropertyChang
 
         CheckPropertyName(AxisGroups_MoveForward);
         CheckPropertyName(AxisGroups_MoveRight);
-        CheckPropertyName(AxisGroups_MoveUp);
         CheckPropertyName(AxisGroups_Turn);
         CheckPropertyName(AxisGroups_LookUp);
         CheckPropertyName(AxisGroups_CameraDistance);

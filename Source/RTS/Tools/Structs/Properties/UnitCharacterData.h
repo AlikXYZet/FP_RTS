@@ -28,7 +28,7 @@ struct FUnitCharacterData
 {
     GENERATED_BODY()
 
-    /* ---   Data   --- */
+    /* ---   Attack   --- */
 
     /* Радиус Патрулирования */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
@@ -46,6 +46,16 @@ struct FUnitCharacterData
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
         Category = "Unit Character Data: Attack")
     UAnimMontage* AM_Attack = nullptr;
+    //-------------------------------------------
+
+
+
+    /* ---   Animation   --- */
+
+    /** BS: Передвижение с зависимостью от скорости */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite,
+        Category = "Unit Character Data: Animation")
+    UBlendSpaceBase* BS_MovementOnSpeed = nullptr;
     //-------------------------------------------
 };
 //--------------------------------------------------------------------------------------

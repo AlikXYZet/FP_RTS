@@ -297,9 +297,9 @@ M_LOG_Static(Error, "lInputComponent is NOT");
     [](const auto& first, const auto& second) \
     { \
         return \
-            first.##Value \
-            ##Operator## \
-            second.##Value; \
+            first.Value \
+            Operator \
+            second.Value; \
     };
 
 /** Макрос: Предикат сортировки по Указателю
@@ -310,9 +310,9 @@ M_LOG_Static(Error, "lInputComponent is NOT");
     [](const auto& first, const auto& second) \
     { \
         return \
-            (IsValid(first.##Ptr) ? first.##Ptr->##Value : ##NoneValue) \
-            ##Operator## \
-            (IsValid(second.##Ptr) ? second.##Ptr->##Value : ##NoneValue); \
+            (IsValid(first.Ptr) ? first.Ptr->Value : NoneValue) \
+            Operator \
+            (IsValid(second.Ptr) ? second.Ptr->Value : NoneValue); \
     };
 //--------------------------------------------------------------------------------------
 
