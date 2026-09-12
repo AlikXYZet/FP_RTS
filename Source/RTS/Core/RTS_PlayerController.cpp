@@ -11,6 +11,7 @@
 #include "GameFramework/InputSettings.h"
 
 // Interaction:
+#include "RTS/Core/RTS_Character.h"
 #include "RTS/Units/UnitCharacter.h"
 
 // Interfaces:
@@ -201,38 +202,48 @@ bool ARTS_PlayerController::InputKey(FKey Key, EInputEvent EventType, float Amou
 
 void ARTS_PlayerController::OnScreenSelection()
 {
-    if (AUnitCharacter* lUnit = Cast<AUnitCharacter>(HitResultForActionGroups.Actor))
+    if (IsSelectionUnlocked())
     {
-        if (lUnit->GetGenericTeamId() == TeamID)
+        if (AUnitCharacter* lUnit = Cast<AUnitCharacter>(HitResultForActionGroups.Actor))
         {
-            if (lUnit->GetSelectionMode() == EActorSelectionMode::ControlledFriend)
+            if (lUnit->GetGenericTeamId() == TeamID)
             {
-                ISelectableActorInterface::Execute_SetSelectionMode(lUnit, EActorSelectionMode::NotSelected);
-                SelectedAlliedUnits.Remove(lUnit);
-            }
-            else
-            {
-                ISelectableActorInterface::Execute_SetSelectionMode(lUnit, EActorSelectionMode::ControlledFriend);
-                SelectedAlliedUnits.Add(lUnit);
-            }
+                if (lUnit->GetSelectionMode() == EActorSelectionMode::ControlledFriend)
+                {
+                    if (SelectedAlliedUnits.Remove(lUnit))
+                    {
+                        ISelectableActorInterface::Execute_SetSelectionMode(lUnit, EActorSelectionMode::NotSelected);
+                        OnChangingSelectedAlliedUnits.Broadcast(SelectedAlliedUnits);
+                    }
+                }
+                else
+                {
+                    SelectedAlliedUnits.Add(lUnit);
+                    ISelectableActorInterface::Execute_SetSelectionMode(lUnit, EActorSelectionMode::ControlledFriend);
+                    OnChangingSelectedAlliedUnits.Broadcast(SelectedAlliedUnits);
+                }
 
-            return;
+                return;
+            }
         }
-    }
 
-    // При нажатии на пустую область стираем Массив Выбранных Союзных Юнитов 
-    ClearSelectedUnits();
+        // При нажатии на пустую область стираем Массив Выбранных Союзных Юнитов 
+        ClearSelectedUnits();
+    }
 }
 
 void ARTS_PlayerController::OnScreenAction()
 {
-    if (ISelectableActorInterface::CheckImplementation(HitResultForActionGroups.Actor.Get()))
+    if (IsSelectionUnlocked())
     {
-        SetSelectedTargetActionActor(HitResultForActionGroups.Actor.Get());
-    }
-    else
-    {
-        SetSelectedTargetActionActor(nullptr);
+        if (ISelectableActorInterface::CheckImplementation(HitResultForActionGroups.Actor.Get()))
+        {
+            SetSelectedTargetActionActor(HitResultForActionGroups.Actor.Get());
+        }
+        else
+        {
+            SetSelectedTargetActionActor(nullptr);
+        }
     }
 }
 //--------------------------------------------------------------------------------------
@@ -299,13 +310,63 @@ void ARTS_PlayerController::ClearSelectedUnits()
             ISelectableActorInterface::Execute_SetSelectionMode(Unit, EActorSelectionMode::NotSelected);
         }
     }
-    SelectedAlliedUnits.Empty();
+
+    SelectedAlliedUnits.Empty(10);
+    OnChangingSelectedAlliedUnits.Broadcast(SelectedAlliedUnits);
 
     if (SelectedTargetActionActor)
     {
         ISelectableActorInterface::Execute_SetSelectionMode(SelectedTargetActionActor, EActorSelectionMode::NotSelected);
         SelectedTargetActionActor = nullptr;
     }
+}
+
+void ARTS_PlayerController::RemoveSelectedUnit(AUnitCharacter* Unit)
+{
+    if (IsValid(Unit))
+    {
+        if (SelectedAlliedUnits.Remove(Unit))
+        {
+            ISelectableActorInterface::Execute_SetSelectionMode(Unit, EActorSelectionMode::NotSelected);
+        }
+    }
+}
+
+void ARTS_PlayerController::AddSelectedUnit(AUnitCharacter* Unit)
+{
+    if (IsValid(Unit))
+    {
+        SelectedAlliedUnits.Add(Unit);
+        ISelectableActorInterface::Execute_SetSelectionMode(Unit, EActorSelectionMode::ControlledFriend);
+    }
+}
+
+void ARTS_PlayerController::AppendSelectedUnits(const TArray<AUnitCharacter*>& Units)
+{
+    int32 lOldNum = SelectedAlliedUnits.Num();
+
+    for (AUnitCharacter* lUnit : Units)
+    {
+        if (IsValid(lUnit))
+        {
+            SelectedAlliedUnits.Add(lUnit);
+        }
+    }
+
+    if(lOldNum != SelectedAlliedUnits.Num())
+    {
+        OnChangingSelectedAlliedUnits.Broadcast(SelectedAlliedUnits);
+    }
+}
+
+bool ARTS_PlayerController::IsSelectionUnlocked() const
+{
+    // 'GetController() == nullptr', так как 'ARTS_Character' наследуется от 'ASpectatorPawn'
+    if (ARTS_Character* lCharacter = Cast<ARTS_Character>(GetPawn()))
+    {
+        return lCharacter->IsScreenEdgeControlUnlocked();
+    }
+    return false;
 }
 
 void ARTS_PlayerController::SetSelectedTargetActionActor(AActor* TargetActor)
@@ -352,7 +413,7 @@ void ARTS_PlayerController::SetSelectedTargetActionActor(AActor* TargetActor)
 
 /* ---   Debugs   --- */
 
-#define CheckPropertyName(Param) \
+#define CheckAxisGroupsName(Param) \
 { \
     if(PropertyName == GET_MEMBER_NAME_CHECKED(ARTS_PlayerController, Param)) \
     { \
@@ -370,9 +431,9 @@ void ARTS_PlayerController::PostEditChangeProperty(FPropertyChangedEvent& Proper
         // Здесь можно написать логику проверки изменённого свойства.
         FName PropertyName = PropertyChangedEvent.Property->GetFName();
 
-        CheckPropertyName(ActionGroups_OtherScreenInteractions);
-        CheckPropertyName(ActionGroups_OnScreenSelection);
-        CheckPropertyName(ActionGroups_OnScreenAction);
+        CheckAxisGroupsName(ActionGroups_OtherScreenInteractions);
+        CheckAxisGroupsName(ActionGroups_OnScreenSelection);
+        CheckAxisGroupsName(ActionGroups_OnScreenAction);
     }
 };
 //--------------------------------------------------------------------------------------

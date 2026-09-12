@@ -31,6 +31,14 @@ class AUnitCharacter;
 
 
 
+/* ---   Delegates   --- */
+
+/* Делегат: При Изменении Выбранных Союзных Юнитов */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnChangingSelectedAlliedUnits, const TSet<AUnitCharacter*>&, CurrentUnits);
+//--------------------------------------------------------------------------------------
+
+
+
 UCLASS()
 class RTS_API ARTS_PlayerController : public APlayerController
 {
@@ -70,6 +78,15 @@ public:
     {
         return IsValidStaticPointer();
     };
+    //-------------------------------------------
+
+
+
+    /* ---   Delegates   --- */
+
+    /* Делегат: При Изменении Выбранных Союзных Юнитов */
+    UPROPERTY(BlueprintAssignable)
+    FOnChangingSelectedAlliedUnits OnChangingSelectedAlliedUnits;
     //-------------------------------------------
 
 
@@ -240,6 +257,26 @@ public:
     UFUNCTION(BlueprintCallable,
         Category = "RTS Player Controller|Selectable Actor")
     void ClearSelectedUnits();
+
+    /** Убрать Юнита из группы Выбранных */
+    UFUNCTION(BlueprintCallable,
+        Category = "RTS Player Controller|Selectable Actor")
+    void RemoveSelectedUnit(AUnitCharacter* Unit);
+
+    /** Добавить Юнита в группу Выбранных */
+    UFUNCTION(BlueprintCallable,
+        Category = "RTS Player Controller|Selectable Actor")
+    void AddSelectedUnit(AUnitCharacter* Unit);
+
+    /** Добавить Юнитов в группу Выбранных */
+    UFUNCTION(BlueprintCallable,
+        Category = "RTS Player Controller|Selectable Actor")
+    void AppendSelectedUnits(const TArray<AUnitCharacter*>& Units);
+
+    /** Проверить, НЕ Блокируется ли управление через наведение мыши на Край Экрана */
+    UFUNCTION(BlueprintPure,
+        Category = "RTS Player Controller|Selectable Actor")
+    bool IsSelectionUnlocked() const;
     //-------------------------------------------
 
 

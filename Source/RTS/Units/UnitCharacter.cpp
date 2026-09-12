@@ -308,3 +308,25 @@ const FFactionData& AUnitCharacter::GetFactionData() const
     return FFactionData::Empty;
 }
 //--------------------------------------------------------------------------------------
+
+
+
+/* ===   For EDITOR only   === */
+
+#if WITH_EDITOR
+
+/* ---   Unit Character Data   --- */
+
+TArray<FName> AUnitCharacter::GetAllUnitClassesTypes() const
+{
+    if (UnitClassesTypes)
+    {
+        return UnitClassesTypes->GetRowNames();
+    }
+
+    return TArray<FName>{NAME_None};
+}
+//--------------------------------------------------------------------------------------
+
+#endif // WITH_EDITOR
+//======================================================================================

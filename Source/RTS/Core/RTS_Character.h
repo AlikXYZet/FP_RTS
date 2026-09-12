@@ -103,12 +103,12 @@ public:
 
     /* ---   Inputs | Actions   --- */
 
-    // Группа Действий для "Test"
-    //UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
-    //    Category = "RTS Character|Inputs|Actions",
-    //    meta = (GetOptions = "GlobalUtilities.BlueprintGlobalFunctions.GetActionGroupsNames",
-    //        DisplayName = "Test"))
-    //FName ActionGroups_Test = NAME_None;
+    /* Группа Действий для контроля управления через наведение мыши на Край Экрана */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
+        Category = "RTS Character|Inputs|Actions",
+        meta = (GetOptions = "GlobalUtilities.BlueprintGlobalFunctions.GetActionGroupsNames",
+            DisplayName = "Screen Edge Control"))
+    FName ActionGroups_ScreenEdgeControl = NAME_None;
     //-------------------------------------------
 
 
@@ -189,6 +189,14 @@ public:
     void SetScreenEdgeControl(bool Value)
     {
         bScreenEdgeControl = Value;
+    };
+
+    /** Проверить, НЕ Блокируется ли управление через наведение мыши на Край Экрана */
+    UFUNCTION(BlueprintPure,
+        Category = "RTS Character|Inputs|Movement")
+    bool IsScreenEdgeControlUnlocked() const
+    {
+        return bScreenEdgeControl;
     };
     //-------------------------------------------
 
@@ -280,6 +288,20 @@ private:
 
     /** Событие: При изменении размера окна просмотра */
     void OnViewportResized(FViewport* Viewport, uint32 Params);
+
+    /** Блокировка управления через наведение мыши на Край Экрана */
+    UFUNCTION()
+    void BlockScreenEdgeControl()
+    {
+        bScreenEdgeControl = false;
+    };
+
+    /** Разблокировка управления через наведение мыши на Край Экрана */
+    UFUNCTION()
+    void UnlockScreenEdgeControl()
+    {
+        bScreenEdgeControl = true;
+    };
     //-------------------------------------------
 
 

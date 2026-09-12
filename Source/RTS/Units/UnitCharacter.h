@@ -266,5 +266,28 @@ private:
     UDataTable* ReserveFactionsData = nullptr;
     //-------------------------------------------
 
+
+    /* ---   Unit Character Data   --- */
+
+    /* Таблица Данных: Типы Классов Юнитов
+    @note   Используется для динамического выбора данных в переменной 'Unit Character Data' в режиме редактора */
+    UPROPERTY(EditDefaultsOnly,
+        Category = "Unit Character|Unit Data",
+        meta = (NoResetToDefault, DisplayPriority = 0))
+    UDataTable* UnitClassesTypes = nullptr;
+    //-------------------------------------------
+
 #endif // WITH_EDITORONLY_DATA
+
+
+#if WITH_EDITOR
+
+    /* ---   Unit Character Data   --- */
+
+    /** Получить все Типы Классов Юнитов из таблицы 'Unit Classes Types' */
+    UFUNCTION()
+    TArray<FName> GetAllUnitClassesTypes() const;
+    //-------------------------------------------
+
+#endif // WITH_EDITOR
 };

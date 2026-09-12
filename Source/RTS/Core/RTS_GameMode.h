@@ -11,6 +11,9 @@
 // Global:
 #include "GlobalMacros.h"
 
+// UE:
+#include "Engine/DataTable.h"
+
 // Structs:
 #include "GenericTeamAgentInterface.h"
 #include "RTS/Tools/Structs/Properties/FactionData.h"

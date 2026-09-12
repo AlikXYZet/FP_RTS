@@ -28,6 +28,17 @@ struct FUnitCharacterData
 {
     GENERATED_BODY()
 
+    /* ---   Class Type   --- */
+
+    /* Тип Класса Юнита */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite,
+        Category = "Unit Character Data: Class Type",
+        meta = (GetOptions = "GetAllUnitClassesTypes"))
+    FName UnitClassType = NAME_None;
+    //-------------------------------------------
+
+
+
     /* ---   Attack   --- */
 
     /* Радиус Патрулирования */

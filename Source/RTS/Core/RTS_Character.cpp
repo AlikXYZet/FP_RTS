@@ -133,13 +133,13 @@ void ARTS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
     /* ===   Actions   === */
 
-    /* ---   Actions | Test   --- */
+    /* ---   Actions | Movement   --- */
 
-    //if (ActionGroups_Test != NAME_None)
-    //{
-    //    PlayerInputComponent->BindAction(ActionGroups_Test, IE_Pressed, this, &ACharacter::Test);
-    //    PlayerInputComponent->BindAction(ActionGroups_Test, IE_Released, this, &ACharacter::StopTest);
-    //}
+    if (ActionGroups_ScreenEdgeControl != NAME_None)
+    {
+        PlayerInputComponent->BindAction(ActionGroups_ScreenEdgeControl, IE_Pressed, this, &ARTS_Character::BlockScreenEdgeControl);
+        PlayerInputComponent->BindAction(ActionGroups_ScreenEdgeControl, IE_Released, this, &ARTS_Character::UnlockScreenEdgeControl);
+    }
     //-------------------------------------------
     //===========================================
 
@@ -168,12 +168,17 @@ void ARTS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
     /* ---   Inputs   --- */
 
-    CheckAxisGroups({
+    CheckInputGroupArray(
+        /* Actions:*/
+        TArray<FName>{ ActionGroups_ScreenEdgeControl },
+        /* Axis:*/
+        TArray<FName>{
         AxisGroups_MoveForward,
-        AxisGroups_MoveRight,
-        AxisGroups_Turn,
-        AxisGroups_LookUp,
-        AxisGroups_CameraDistance });
+            AxisGroups_MoveRight,
+            AxisGroups_Turn,
+            AxisGroups_LookUp,
+            AxisGroups_CameraDistance }
+    );
     //-------------------------------------------
 
 #endif // WITH_EDITOR
@@ -421,7 +426,13 @@ FORCEINLINE void ARTS_Character::CameraRangeControl(float DeltaTime)
 
 /* ---   Debugs   --- */
 
-#define CheckPropertyName(Param) \
+#define CheckActionGroupsName(Param) \
+{ \
+    if(PropertyName == GET_MEMBER_NAME_CHECKED(ARTS_Character, Param)) \
+        CheckActionGroups({ Param }); \
+}
+
+#define CheckClickEventKeys(Param) \
 { \
     if(PropertyName == GET_MEMBER_NAME_CHECKED(ARTS_Character, Param)) \
         CheckAxisGroups({ Param }); \
@@ -436,11 +447,13 @@ void ARTS_Character::PostEditChangeProperty(FPropertyChangedEvent& PropertyChang
         // Здесь можно написать логику проверки изменённого свойства.
         FName PropertyName = PropertyChangedEvent.Property->GetFName();
 
-        CheckPropertyName(AxisGroups_MoveForward);
-        CheckPropertyName(AxisGroups_MoveRight);
-        CheckPropertyName(AxisGroups_Turn);
-        CheckPropertyName(AxisGroups_LookUp);
-        CheckPropertyName(AxisGroups_CameraDistance);
+        CheckActionGroupsName(ActionGroups_ScreenEdgeControl);
+
+        CheckClickEventKeys(AxisGroups_MoveForward);
+        CheckClickEventKeys(AxisGroups_MoveRight);
+        CheckClickEventKeys(AxisGroups_Turn);
+        CheckClickEventKeys(AxisGroups_LookUp);
+        CheckClickEventKeys(AxisGroups_CameraDistance);
     }
 }
 //--------------------------------------------------------------------------------------

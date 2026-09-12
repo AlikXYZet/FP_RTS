@@ -11,6 +11,9 @@
 // Global:
 #include "GlobalMacros.h"
 
+// UE:
+#include "Engine/DataTable.h"
+
 // Generated:
 #include "RTS_GameState.generated.h"
 //--------------------------------------------------------------------------------------
@@ -107,6 +110,18 @@ public:
     /** Вызывается, когда этот субъект явно уничтожается во время игрового процесса или в редакторе,
     * но не вызывается во время трансляции уровней или завершения игрового процесса */
     virtual void Destroyed() override;
+    //-------------------------------------------
+
+
+
+    /* ---   Units Data   --- */
+
+    /* Таблица Данных: Типы Классов Юнитов
+    @note   Используется для использования настраиваемых в среде BP Данных */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
+        Category = "RTS Game State|Units Data",
+        meta = (NoResetToDefault))
+    UDataTable* UnitClassesTypes = nullptr;
     //-------------------------------------------
 
 
