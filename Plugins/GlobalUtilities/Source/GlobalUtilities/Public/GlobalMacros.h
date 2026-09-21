@@ -351,7 +351,7 @@ M_LOG_Static(Error, "lInputComponent is NOT");
 or      #include "Templates/UnrealTypeTraits.h"
 
 // Базовые:
-Expose_TFormatSpecifier(bool, "%i")     // Не работает для `bool`
+Expose_TFormatSpecifier(bool, "%i")     // Не работает для `bool` и предназначен для 'int' (подобно %d)
 Expose_TFormatSpecifier(uint8, "%u")
 Expose_TFormatSpecifier(uint16, "%u")
 Expose_TFormatSpecifier(uint32, "%u")

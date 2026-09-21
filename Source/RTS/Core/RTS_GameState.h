@@ -23,7 +23,7 @@
 /* ---   Pre-declaration of classes   --- */
 
 // Static Functions:
-static ARTS_GameStateBase* const GetRTSGameState();
+static class ARTS_GameStateBase* const GetRTSGameState();
 //--------------------------------------------------------------------------------------
 
 

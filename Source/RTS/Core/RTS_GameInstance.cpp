@@ -6,9 +6,6 @@
 // UE:
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/GameUserSettings.h"
-
-// Interaction:
-#include "RTS/Tools/Saving/Settings/SaveSettings.h"
 //--------------------------------------------------------------------------------------
 
 
@@ -35,9 +32,20 @@ void URTS_GameInstance::Init()
 
 /* ---   Settings System | Saving   --- */
 
+bool URTS_GameInstance::SaveSettingsData(const FSettingsData& Data)
+{
+    if (Data != SaveSettings->SettingsData)
+    {
+        SaveSettings->SettingsData = Data;
+        UGameplayStatics::SaveGameToSlot(SaveSettings, "SettingsData", 0);
+    }
+
+    return false;
+}
+
 void URTS_GameInstance::InitSettingsSaving()
 {
-    USaveSettings* SaveSettings = Cast<USaveSettings>(UGameplayStatics::LoadGameFromSlot("SettingsData", 0));
+    SaveSettings = Cast<USaveSettings>(UGameplayStatics::LoadGameFromSlot("SettingsData", 0));
 
     if (!SaveSettings)
     {
@@ -57,9 +65,11 @@ void URTS_GameInstance::InitSettingsSaving()
 
         // Разрешение экрана
         TArray<FIntPoint> lAllRes; // Все доступные вариации Разрешения экрана (от меньшего к большему)
-        UKismetSystemLibrary::GetSupportedFullscreenResolutions(lAllRes);
-        // Принятие последнего (наибольшего) значения Разрешения экрана
-        lGameUserSettings->SetScreenResolution(lAllRes[lAllRes.Num() - 1]);
+        if (lAllRes.Num()) // Нет гарантии заполненности Массива
+        {
+            // Принятие последнего (наибольшего) значения Разрешения экрана
+            lGameUserSettings->SetScreenResolution(lAllRes[lAllRes.Num() - 1]);
+        }
 
         // "Frame Per Second"
         lGameUserSettings->SetFrameRateLimit(60);
@@ -91,7 +101,7 @@ void URTS_GameInstance::InitSettingsSaving()
                     GetWorld(),
                     SoundMix,
                     MusicSoundClass,
-                    SaveSettings->SettingsData.OverallSoundsVolume * SaveSettings->SettingsData.MusicSoundsVolume,
+                    GetSettingsData().OverallSoundsVolume * GetSettingsData().MusicSoundsVolume,
                     1.f,
                     0.f);
             }
@@ -106,7 +116,7 @@ void URTS_GameInstance::InitSettingsSaving()
                     GetWorld(),
                     SoundMix,
                     MusicSoundClass,
-                    SaveSettings->SettingsData.OverallSoundsVolume * SaveSettings->SettingsData.EffectSoundsVolume,
+                    GetSettingsData().OverallSoundsVolume * GetSettingsData().EffectSoundsVolume,
                     1.f,
                     0.f);
             }

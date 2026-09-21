@@ -22,9 +22,13 @@ struct FSettingsData
 
     /* ---   Gameplay   --- */
 
-    /** Флаг отображения Крови */
+    /* Флаг отображения Крови */
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     bool bBloodIsShown = false;
+
+    /* Флаг отображения Подсказок Управления */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    bool bControlTipsIsShown = true;
     //-------------------------------------------
 
 
@@ -34,11 +38,11 @@ struct FSettingsData
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float OverallSoundsVolume = 0.3f;
 
-    // Громкость Музыки
+    /* Громкость Музыки */
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float MusicSoundsVolume = 1.0f;
 
-    // Громкость Эффектов
+    /* Громкость Эффектов */
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float EffectSoundsVolume = 1.0f;
     //-------------------------------------------
@@ -46,13 +50,21 @@ struct FSettingsData
 
     /* ---   Operators | =   --- */
 
-    bool operator!=(const FSettingsData& Second)
+    bool operator!=(const FSettingsData& Second) const
     {
         return bBloodIsShown != Second.bBloodIsShown
+            || bControlTipsIsShown != Second.bControlTipsIsShown
             || OverallSoundsVolume != Second.OverallSoundsVolume
             || MusicSoundsVolume != Second.MusicSoundsVolume
             || EffectSoundsVolume != Second.EffectSoundsVolume;
     };
+    //-------------------------------------------
+
+
+    /* ---   Statics   --- */
+
+    /* Пустые Данные Настроек */
+    static const FSettingsData Empty;
     //-------------------------------------------
 };
 //--------------------------------------------------------------------------------------

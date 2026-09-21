@@ -15,10 +15,6 @@
 // UE:
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/GameUserSettings.h"
-
-// Interaction:
-#include "RTS/Core/RTS_GameInstance.h"
-#include "RTS/Tools/Saving/Settings/SaveSettings.h"
 //--------------------------------------------------------------------------------------
 
 
@@ -61,9 +57,9 @@ const int32 USettingsWidget::GetDisplayFrequency() const
 
 void USettingsWidget::LoadSettings()
 {
-    if (NewSettingsData != SaveSettings->SettingsData)
+    if (NewSettingsData != GetCurrentSettingsData())
     {
-        NewSettingsData = SaveSettings->SettingsData;
+        NewSettingsData = GetCurrentSettingsData();
 
         UpdateSounds();
     }
@@ -78,11 +74,7 @@ void USettingsWidget::LoadSettings()
 
 void USettingsWidget::ApplySettings()
 {
-    if (NewSettingsData != SaveSettings->SettingsData)
-    {
-        SaveSettings->SettingsData = NewSettingsData;
-        UGameplayStatics::SaveGameToSlot(SaveSettings, SettingsDataSlot, 0);
-    }
+    GetRTSGameInstance()->SaveSettingsData(NewSettingsData);
 
     if (bIsVideoSettingsDirty
         || GameUserSettings->IsDirty())
@@ -97,15 +89,13 @@ void USettingsWidget::ApplySettings()
 bool USettingsWidget::IsSettingsDirty()
 {
     return bIsVideoSettingsDirty
-        || NewSettingsData != SaveSettings->SettingsData
+        || NewSettingsData != GetCurrentSettingsData()
         || GEngine->GetGameUserSettings()->IsDirty();
 }
 
 void USettingsWidget::InitWidgetData()
 {
-    SaveSettings = Cast<USaveSettings>(UGameplayStatics::LoadGameFromSlot(SettingsDataSlot, 0));
-    NewSettingsData = SaveSettings->SettingsData;
-
+    NewSettingsData = GetCurrentSettingsData();
     GameUserSettings = GEngine->GetGameUserSettings();
 }
 //--------------------------------------------------------------------------------------
@@ -126,7 +116,7 @@ void USettingsWidget::UpdateSounds()
                 GetWorld(),
                 GetRTSGameInstance()->SoundMix,
                 GetRTSGameInstance()->MusicSoundClass,
-                SaveSettings->SettingsData.OverallSoundsVolume * SaveSettings->SettingsData.MusicSoundsVolume,
+                GetCurrentSettingsData().OverallSoundsVolume * GetCurrentSettingsData().MusicSoundsVolume,
                 1.f,
                 0.f);
         }
@@ -137,7 +127,7 @@ void USettingsWidget::UpdateSounds()
                 GetWorld(),
                 GetRTSGameInstance()->SoundMix,
                 GetRTSGameInstance()->MusicSoundClass,
-                SaveSettings->SettingsData.OverallSoundsVolume * SaveSettings->SettingsData.EffectSoundsVolume,
+                GetCurrentSettingsData().OverallSoundsVolume * GetCurrentSettingsData().EffectSoundsVolume,
                 1.f,
                 0.f);
         }

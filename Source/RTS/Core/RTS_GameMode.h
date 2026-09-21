@@ -27,7 +27,7 @@
 /* ---   Pre-declaration of classes   --- */
 
 // Static Functions:
-static ARTS_GameModeBase* const GetRTSGameMode();
+static class ARTS_GameModeBase* const GetRTSGameMode();
 
 // Interaction:
 class AUnitCharacter;

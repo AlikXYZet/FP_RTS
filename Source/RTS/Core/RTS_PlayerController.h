@@ -23,7 +23,7 @@
 /* ---   Pre-declaration of classes   --- */
 
 // Static Functions:
-static ARTS_PlayerController* const GetRTSLocalController();
+static class ARTS_PlayerController* const GetRTSLocalController();
 
 // Interaction:
 class AUnitCharacter;

@@ -26,6 +26,8 @@ class GLOBALUTILITIES_API UBlueprintGlobalFunctions : public UBlueprintFunctionL
 {
     GENERATED_BODY()
 
+public:
+
     /* ---   FText   --- */
 
     /** Converts localizable FText to a FName value */

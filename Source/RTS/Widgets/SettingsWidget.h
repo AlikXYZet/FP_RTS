@@ -7,6 +7,9 @@
 // Structs:
 #include "RTS/Tools/Saving/Settings/SettingsData.h"
 
+// Interaction:
+#include "RTS/Core/RTS_GameInstance.h"
+
 // Generated:
 #include "SettingsWidget.generated.h"
 //--------------------------------------------------------------------------------------
@@ -24,7 +27,7 @@ class USaveSettings;
 UCLASS()
 class RTS_API USettingsWidget : public UUserWidget
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
 
@@ -99,13 +102,15 @@ private:
     // Наименование слотов сохранения данных Настроек
     FString SettingsDataSlot = "SettingsData";
 
-    // Сохраняемые данные Настроек
-    UPROPERTY()
-    USaveSettings* SaveSettings = nullptr;
-
     //
 
     /** Инициализация данных */
     void InitWidgetData();
+
+    /** Получить текущие данные Настроек */
+    FORCEINLINE const FSettingsData& GetCurrentSettingsData() const
+    {
+        return GetRTSGameInstance()->GetSettingsData();
+    };
     //-------------------------------------------
 };

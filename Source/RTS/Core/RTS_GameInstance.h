@@ -11,6 +11,12 @@
 // Global:
 #include "GlobalMacros.h"
 
+// Structs:
+#include "RTS/Tools/Saving/Settings/SettingsData.h"
+
+// Interaction:
+#include "RTS/Tools/Saving/Settings/SaveSettings.h"
+
 // Generated:
 #include "RTS_GameInstance.generated.h"
 //--------------------------------------------------------------------------------------
@@ -20,7 +26,7 @@
 /* ---   Pre-declaration of classes   --- */
 
 // Static Functions:
-static URTS_GameInstance* const GetRTSGameInstance();
+static class URTS_GameInstance* const GetRTSGameInstance();
 //--------------------------------------------------------------------------------------
 
 
@@ -89,21 +95,46 @@ public:
 
 
 
+    /* ---   Settings System | Saving   --- */
+
+    /* Получить актуальные Данные Настроек */
+    UFUNCTION(BlueprintPure,
+        Category = "RTS Game Instance|Settings System",
+        meta = (ReturnDisplayName = "Data"))
+    const FSettingsData& GetSettingsData() const
+    {
+        if (SaveSettings)
+        {
+            return SaveSettings->SettingsData;
+        }
+
+        return FSettingsData::Empty;
+    };
+
+    /** Сохранить заданные данные настроек */
+    UFUNCTION(BlueprintCallable,
+        Category = "RTS Game Instance|Settings System",
+        meta = (ReturnDisplayName = "Result"))
+    bool SaveSettingsData(const FSettingsData& Data);
+    //-------------------------------------------
+
+
+
     /* ---   Settings System | Sounds   --- */
 
     // Микшер громкости
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
-        Category = "Settings System: Sounds")
+        Category = "RTS Game Instance|Settings System: Sounds")
     USoundMix* SoundMix = nullptr;
 
     // Микшер громкости для Музыки
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
-        Category = "Settings System: Sounds")
+        Category = "RTS Game Instance|Settings System: Sounds")
     USoundClass* MusicSoundClass = nullptr;
 
     // Микшер громкости для Эффектов
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
-        Category = "Settings System: Sounds")
+        Category = "RTS Game Instance|Settings System: Sounds")
     USoundClass* EffectsSoundClass = nullptr;
     //-------------------------------------------
 
@@ -126,6 +157,12 @@ private:
 
 
     /* ---   Settings System | Saving   --- */
+
+    /* Сохраняемые данные Настроек */
+    UPROPERTY()
+    USaveSettings* SaveSettings = nullptr;
+
+    //
 
     /** Инициализация сохранения данных Настроек */
     void InitSettingsSaving();

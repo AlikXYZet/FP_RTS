@@ -334,7 +334,8 @@ void ARTS_PlayerController::RemoveSelectedUnit(AUnitCharacter* Unit)
 
 void ARTS_PlayerController::AddSelectedUnit(AUnitCharacter* Unit)
 {
-    if (IsValid(Unit))
+    if (IsValid(Unit)
+        && Unit->GetGenericTeamId() == TeamID)
     {
         SelectedAlliedUnits.Add(Unit);
         ISelectableActorInterface::Execute_SetSelectionMode(Unit, EActorSelectionMode::ControlledFriend);
@@ -344,16 +345,18 @@ void ARTS_PlayerController::AddSelectedUnit(AUnitCharacter* Unit)
 void ARTS_PlayerController::AppendSelectedUnits(const TArray<AUnitCharacter*>& Units)
 {
     int32 lOldNum = SelectedAlliedUnits.Num();
+    SelectedAlliedUnits.Reserve(SelectedAlliedUnits.Num() + Units.Num());
 
     for (AUnitCharacter* lUnit : Units)
     {
-        if (IsValid(lUnit))
+        if (IsValid(lUnit)
+            && lUnit->GetGenericTeamId() == TeamID)
         {
             SelectedAlliedUnits.Add(lUnit);
         }
     }
 
-    if(lOldNum != SelectedAlliedUnits.Num())
+    if (lOldNum != SelectedAlliedUnits.Num())
     {
         OnChangingSelectedAlliedUnits.Broadcast(SelectedAlliedUnits);
     }
@@ -466,7 +469,7 @@ void ARTS_PlayerController::UpdateClickEventKeys()
             }
         }
 
-        ClickEventKeys.Empty();
+        ClickEventKeys.Empty(lArray.Num());
         for (FInputActionKeyMapping& Data : lArray)
         {
             ClickEventKeys.AddUnique(Data.Key);
