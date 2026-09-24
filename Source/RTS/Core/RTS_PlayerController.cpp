@@ -305,7 +305,7 @@ void ARTS_PlayerController::ClearSelectedUnits()
 {
     for (auto Unit : SelectedAlliedUnits)
     {
-        if (Unit)
+        if (IsValid(Unit))
         {
             ISelectableActorInterface::Execute_SetSelectionMode(Unit, EActorSelectionMode::NotSelected);
         }
@@ -323,12 +323,11 @@ void ARTS_PlayerController::ClearSelectedUnits()
 
 void ARTS_PlayerController::RemoveSelectedUnit(AUnitCharacter* Unit)
 {
+    SelectedAlliedUnits.Remove(Unit);
+
     if (IsValid(Unit))
     {
-        if (SelectedAlliedUnits.Remove(Unit))
-        {
-            ISelectableActorInterface::Execute_SetSelectionMode(Unit, EActorSelectionMode::NotSelected);
-        }
+        ISelectableActorInterface::Execute_SetSelectionMode(Unit, EActorSelectionMode::NotSelected);
     }
 }
 
@@ -376,7 +375,16 @@ void ARTS_PlayerController::SetSelectedTargetActionActor(AActor* TargetActor)
 {
     if (SelectedTargetActionActor)
     {
-        ISelectableActorInterface::Execute_SetSelectionMode(SelectedTargetActionActor, EActorSelectionMode::NotSelected);
+        if (SelectedAlliedUnits.Find((const AUnitCharacter*)SelectedTargetActionActor))
+        {
+            SelectedTargetActionMode = EActorSelectionMode::ControlledFriend;
+        }
+        else
+        {
+            SelectedTargetActionMode = EActorSelectionMode::NotSelected;
+        }
+
+        ISelectableActorInterface::Execute_SetSelectionMode(SelectedTargetActionActor, SelectedTargetActionMode);
     }
 
     SelectedTargetActionActor = TargetActor;
