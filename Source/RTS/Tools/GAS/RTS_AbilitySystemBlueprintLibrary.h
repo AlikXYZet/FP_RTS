@@ -49,6 +49,14 @@ class RTS_API URTS_AbilitySystemBlueprintLibrary : public UBlueprintFunctionLibr
                 Actor ? *Actor->GetName() : *STRING_None);
 
             lASC = Actor ? Actor->FindComponentByClass<UAbilitySystemComponent>() : nullptr;
+
+            if (lASC)
+            {
+                M_Error_Static(
+                    "\n\t'%s' does NOT Implement 'Ability System Interface',"
+                    "\n\tBUT HAS an 'Ability System Component'.",
+                    Actor ? *Actor->GetName() : *STRING_None);
+            }
         }
 #endif // WITH_EDITOR
 
@@ -92,6 +100,14 @@ class RTS_API URTS_AbilitySystemBlueprintLibrary : public UBlueprintFunctionLibr
                     }
                 }
             }
+
+            if (lAttributeSet)
+            {
+                M_Error_Static(
+                    "\n\t'%s' does NOT Implement 'RTS Ability System Interface',"
+                    "\n\tBUT HAS an 'RTS Attribute Set'.",
+                    Actor ? *Actor->GetName() : *STRING_None);
+            }
         }
 #endif // WITH_EDITOR
 
@@ -127,6 +143,14 @@ class RTS_API URTS_AbilitySystemBlueprintLibrary : public UBlueprintFunctionLibr
                         break;
                     }
                 }
+            }
+
+            if (lAttributeSet)
+            {
+                M_Error_Static(
+                    "\n\t'%s' does NOT Implement 'RTS Ability System Interface',"
+                    "\n\tBUT HAS an 'RTS Attribute Set'.",
+                    Actor ? *Actor->GetName() : *STRING_None);
             }
         }
 #endif // WITH_EDITOR

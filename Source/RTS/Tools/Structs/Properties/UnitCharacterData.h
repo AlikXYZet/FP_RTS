@@ -45,7 +45,7 @@ struct FUnitCharacterData
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
         Category = "Unit Character Data: Attack",
         meta = (ClampMin = "0", UIMin = "0"))
-    float PatrolRadius = 500.f;
+    float ViewingRadius = 1000.f;
 
     /* Дистанция Атаки */
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
@@ -68,5 +68,19 @@ struct FUnitCharacterData
         Category = "Unit Character Data: Animation")
     UBlendSpaceBase* BS_MovementOnSpeed = nullptr;
     //-------------------------------------------
+};
+//--------------------------------------------------------------------------------------
+
+
+
+/* ---   Enum   --- */
+
+UENUM(BlueprintType)
+enum struct EFloatUnitCharacterData : uint8
+{
+    NONE = 0,
+
+    ViewingRadius   UMETA(DisplayName = "Viewing Radius"),
+    AttackDistance  UMETA(DisplayName = "Attack Distance"),
 };
 //--------------------------------------------------------------------------------------

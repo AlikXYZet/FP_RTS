@@ -23,8 +23,10 @@ URTS_GameInstance* URTS_GameInstance::CurrentGameInstance = nullptr;
 void URTS_GameInstance::Init()
 {
     InitSettingsSaving();
-
+    
     Super::Init();
+
+    InitSounds();
 }
 //--------------------------------------------------------------------------------------
 
@@ -87,49 +89,59 @@ void URTS_GameInstance::InitSettingsSaving()
 
         UGameplayStatics::SaveGameToSlot(SaveSettings, "SettingsData", 0);
         //-------------------------------------------
-
-
-        /* ---   Default Sounds settings:   --- */
-
-        if (SoundMix)
-        {
-            UGameplayStatics::PushSoundMixModifier(GetWorld(), SoundMix);
-
-            if (MusicSoundClass)
-            {
-                UGameplayStatics::SetSoundMixClassOverride(
-                    GetWorld(),
-                    SoundMix,
-                    MusicSoundClass,
-                    GetSettingsData().OverallSoundsVolume * GetSettingsData().MusicSoundsVolume,
-                    1.f,
-                    0.f);
-            }
-            else
-            {
-                M_Error("MusicSoundClass is NOT");
-            }
-
-            if (EffectsSoundClass)
-            {
-                UGameplayStatics::SetSoundMixClassOverride(
-                    GetWorld(),
-                    SoundMix,
-                    MusicSoundClass,
-                    GetSettingsData().OverallSoundsVolume * GetSettingsData().EffectSoundsVolume,
-                    1.f,
-                    0.f);
-            }
-            else
-            {
-                M_Error("EffectsSoundClass is NOT");
-            }
-        }
-        else
-        {
-            M_Error("SoundMix is NOT");
-        }
-        //-------------------------------------------
     }
+
+    // PS: Так как данная функция вызывается в Init(), то далее 'Save Settings' будет валиден всегда
 }
 //--------------------------------------------------------------------------------------
+
+
+
+/* ---   Settings System | Sounds   --- */
+
+void URTS_GameInstance::InitSounds()
+{
+    if (SoundMix)
+    {
+        UGameplayStatics::PushSoundMixModifier(GetWorld(), SoundMix);
+        UpdateSounds();
+    }
+    else
+    {
+        M_Error("SoundMix is NOT");
+    }
+}
+
+void URTS_GameInstance::UpdateSounds()
+{
+    if (MusicSoundClass)
+    {
+        UGameplayStatics::SetSoundMixClassOverride(
+            GetWorld(),
+            SoundMix,
+            MusicSoundClass,
+            GetSettingsData().MusicSoundsVolume,
+            GetSettingsData().OverallSoundsVolume,
+            0.f);
+    }
+    else
+    {
+        M_Error("MusicSoundClass is NOT");
+    }
+
+    if (EffectsSoundClass)
+    {
+        UGameplayStatics::SetSoundMixClassOverride(
+            GetWorld(),
+            SoundMix,
+            MusicSoundClass,
+            GetSettingsData().EffectSoundsVolume,
+            GetSettingsData().OverallSoundsVolume,
+            0.f);
+    }
+    else
+    {
+        M_Error("EffectsSoundClass is NOT");
+    }
+}
+//-------------------------------------------

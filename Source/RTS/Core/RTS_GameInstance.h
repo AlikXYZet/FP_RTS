@@ -103,12 +103,10 @@ public:
         meta = (ReturnDisplayName = "Data"))
     const FSettingsData& GetSettingsData() const
     {
-        if (SaveSettings)
-        {
-            return SaveSettings->SettingsData;
-        }
-
-        return FSettingsData::Empty;
+        // Предполагается, что будет валидна всегда (см. 'InitSettingsSaving()'):
+        //if (SaveSettings)
+        return SaveSettings->SettingsData;
+        //return FSettingsData::Empty;
     };
 
     /** Сохранить заданные данные настроек */
@@ -166,6 +164,17 @@ private:
 
     /** Инициализация сохранения данных Настроек */
     void InitSettingsSaving();
+    //-------------------------------------------
+
+
+
+    /* ---   Settings System | Sounds   --- */
+
+    /** Инициализация Звука */
+    void InitSounds();
+
+    /** Обновить Звук */
+    void UpdateSounds();
     //-------------------------------------------
 };
 
