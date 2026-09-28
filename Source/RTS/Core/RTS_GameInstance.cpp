@@ -67,6 +67,7 @@ void URTS_GameInstance::InitSettingsSaving()
 
         // Разрешение экрана
         TArray<FIntPoint> lAllRes; // Все доступные вариации Разрешения экрана (от меньшего к большему)
+        UKismetSystemLibrary::GetSupportedFullscreenResolutions(lAllRes);
         if (lAllRes.Num()) // Нет гарантии заполненности Массива
         {
             // Принятие последнего (наибольшего) значения Разрешения экрана

@@ -89,7 +89,7 @@ void UBTD_IsAtInteractionDistance::InitializeFromAsset(UBehaviorTree& Asset)
     {
         UE_LOG(LogBehaviorTree, Warning, TEXT("Can't initialize %s due to missing blackboard data."), *GetName());
         StartPoint.InvalidateResolvedKey();
-        EndPoint.ResolveSelectedKey(*BBAsset);
+        EndPoint.InvalidateResolvedKey();
     }
 }
 
